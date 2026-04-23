@@ -1,0 +1,71 @@
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+import { Express } from 'express';
+
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'BookG Priest Booking API',
+      version: '1.0.0',
+      description: 'API documentation for the Priest Booking System',
+    },
+    servers: [
+      {
+        url: '/api/v1',
+        description: 'Development server',
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+        cookieAuth: {
+          type: 'apiKey',
+          in: 'cookie',
+          name: 'accessToken',
+        },
+      },
+      responses: {
+        Unauthorized: {
+          description: 'Not authenticated',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: { type: 'boolean', example: false },
+                  message: { type: 'string', example: 'Not authenticated' },
+                },
+              },
+            },
+          },
+        },
+        NotFound: {
+          description: 'Resource not found',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: { type: 'boolean', example: false },
+                  message: { type: 'string', example: 'Resource not found' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  apis: ['./src/routes/*.ts', './src/models/*.ts'],
+};
+
+export const setupSwagger = (app: Express): void => {
+  const spec = swaggerJsdoc(options);
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(spec));
+  app.get('/api-docs.json', (_, res) => res.json(spec));
+};
