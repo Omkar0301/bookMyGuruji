@@ -36,6 +36,17 @@ export class AuthController {
   });
 
   /**
+   * Register a new priest.
+   */
+  static registerPriest = catchAsync(async (req: Request, res: Response) => {
+    const { user, accessToken, refreshToken } = await AuthService.registerPriest(req.body);
+
+    AuthController.setAuthCookies(res, accessToken, refreshToken);
+
+    return successResponse(res, { user, accessToken }, 'Priest registered successfully', 201);
+  });
+
+  /**
    * Login user.
    */
   static login = catchAsync(async (req: Request, res: Response) => {
@@ -45,6 +56,57 @@ export class AuthController {
     AuthController.setAuthCookies(res, accessToken, refreshToken);
 
     return successResponse(res, { user, accessToken }, 'Login successful');
+  });
+
+  /**
+   * Verify email.
+   */
+  static verifyEmail = catchAsync(async (req: Request, res: Response) => {
+    const { token } = req.params;
+    if (!token) {
+      return errorResponse(res, 'Verification token is required', 400);
+    }
+    await AuthService.verifyEmail(token as string);
+    return successResponse(res, null, 'Email verified successfully');
+  });
+
+  /**
+   * Forgot password.
+   */
+  static forgotPassword = catchAsync(async (req: Request, res: Response) => {
+    const { email } = req.body;
+    await AuthService.forgotPassword(email);
+    return successResponse(res, null, 'Password reset link sent to your email');
+  });
+
+  /**
+   * Reset password.
+   */
+  static resetPassword = catchAsync(async (req: Request, res: Response) => {
+    const { token } = req.params;
+    const { password } = req.body;
+    if (!token) {
+      return errorResponse(res, 'Reset token is required', 400);
+    }
+    await AuthService.resetPassword(token as string, password);
+    return successResponse(res, null, 'Password reset successfully');
+  });
+
+  /**
+   * Handle Google OAuth success.
+   */
+  static googleAuthSuccess = catchAsync(async (req: Request, res: Response) => {
+    if (!req.user) {
+      return errorResponse(res, 'Google authentication failed', 401);
+    }
+
+    const { accessToken, refreshToken } = await AuthService.generateTokensAndSave(req.user);
+
+    AuthController.setAuthCookies(res, accessToken, refreshToken);
+
+    // Redirect to frontend with token or just respond success if it's a popup
+    // Since it's a callback, usually we redirect to a frontend success page
+    res.redirect(`${env.CLIENT_URL}/oauth-success?token=${accessToken}`);
   });
 
   /**

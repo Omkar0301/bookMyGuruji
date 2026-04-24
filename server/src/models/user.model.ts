@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 // ────────────────────────────────────────────────────────────────
 
 export interface IUser extends Document {
+  id: string;
   name: { first: string; last: string };
   email: string;
   phone: string;
@@ -27,8 +28,12 @@ export interface IUser extends Document {
   isActive: boolean;
   wishlist: mongoose.Types.ObjectId[];
   refreshTokens: string[];
-  googleId: string;
-  otp: { code: string; expiresAt: Date };
+  googleId?: string;
+  otp: { code?: string; expiresAt?: Date };
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
 
@@ -117,6 +122,10 @@ const userSchema = new Schema<IUser>(
       code: { type: String, select: false },
       expiresAt: { type: Date, select: false },
     },
+    emailVerificationToken: String,
+    emailVerificationExpires: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   {
     timestamps: true,
@@ -140,8 +149,6 @@ const userSchema = new Schema<IUser>(
 // Indexes
 // ────────────────────────────────────────────────────────────────
 
-userSchema.index({ email: 1 }, { unique: true });
-userSchema.index({ phone: 1 }, { unique: true });
 userSchema.index({ 'address.location': '2dsphere' });
 userSchema.index({ role: 1 });
 userSchema.index({ isActive: 1 });

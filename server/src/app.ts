@@ -10,11 +10,15 @@ import { errorHandler } from './middlewares/error.middleware';
 import mongoose from 'mongoose';
 import apiRouter from './routes';
 import { setupSwagger } from './config/swagger';
+import passport from './config/passport';
 
 const app = express();
 
 // Initialize Swagger
 setupSwagger(app);
+
+// Initialize Passport
+app.use(passport.initialize());
 
 // ────────────────────────────────────────────────────────────────
 // Security middleware
@@ -42,7 +46,7 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-app.use('/api', apiLimiter);
+app.use('/api/v1', apiLimiter);
 
 // ────────────────────────────────────────────────────────────────
 // Body parsing & logging
@@ -76,7 +80,7 @@ app.get('/health', async (_req, res) => {
 // API Routes
 // ────────────────────────────────────────────────────────────────
 
-app.use('/api', apiRouter);
+app.use('/api/v1', apiRouter);
 
 // ────────────────────────────────────────────────────────────────
 // 404 handler

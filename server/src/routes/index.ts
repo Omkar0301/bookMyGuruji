@@ -11,9 +11,14 @@ import uploadRoutes from './upload.routes';
 const router = Router();
 
 /**
- * @route   GET /api/ping
- * @desc    Liveness check
- * @access  Public
+ * @swagger
+ * /ping:
+ *   get:
+ *     summary: Liveness check
+ *     tags: [System]
+ *     responses:
+ *       200:
+ *         description: Server is alive
  */
 router.get('/ping', (_req, res) => {
   res.status(200).json({ success: true, message: 'pong' });

@@ -190,7 +190,6 @@ const priestProfileSchema = new Schema<IPriestProfile>(
 // Indexes
 // ────────────────────────────────────────────────────────────────
 
-priestProfileSchema.index({ user: 1 }, { unique: true });
 priestProfileSchema.index({ verificationStatus: 1 });
 priestProfileSchema.index({ 'rating.average': -1 });
 priestProfileSchema.index({ specialisations: 1 });

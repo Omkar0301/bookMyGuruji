@@ -1,6 +1,8 @@
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { Express } from 'express';
+import path from 'path';
+import { env } from './env';
 
 const options = {
   definition: {
@@ -12,8 +14,8 @@ const options = {
     },
     servers: [
       {
-        url: '/api/v1',
-        description: 'Development server',
+        url: `http://localhost:${env.PORT}/api/v1`,
+        description: 'Local server',
       },
     ],
     components: {
@@ -61,7 +63,10 @@ const options = {
       },
     },
   },
-  apis: ['./src/routes/*.ts', './src/models/*.ts'],
+  apis: [
+    path.join(__dirname, '..', 'routes', '*.{ts,js}'),
+    path.join(__dirname, '..', 'models', '*.{ts,js}'),
+  ],
 };
 
 export const setupSwagger = (app: Express): void => {

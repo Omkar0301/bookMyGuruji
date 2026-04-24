@@ -15,36 +15,44 @@ declare module 'express-serve-static-core' {
 
 /**
  * Middleware to protect routes — verifies JWT access token.
- * Token must be in Authorization: Bearer <token> header.
  */
-export const protect = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const token = extractToken(req);
+export const protect: RequestHandler = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const token = extractToken(req);
 
-  if (!token) {
-    return errorResponse(res, 'You are not logged in. Please log in to get access.', 401);
+    if (!token) {
+      return errorResponse(res, 'You are not logged in. Please log in to get access.', 401);
+    }
+
+    // 2) Verify token
+    let decoded: { id: string; role: string; email: string };
+    try {
+      decoded = jwt.verify(token, env.JWT_ACCESS_SECRET) as {
+        id: string;
+        role: string;
+        email: string;
+      };
+    } catch {
+      return errorResponse(res, 'Invalid token or token expired', 401);
+    }
+
+    // 3) Check if user still exists and is active
+    // Exclude password and refreshTokens by default (not selecting them)
+    const currentUser = await User.findById(decoded.id);
+
+    if (!currentUser) {
+      return errorResponse(res, 'The user belonging to this token no longer exists.', 401);
+    }
+
+    if (!currentUser.isActive) {
+      return errorResponse(res, 'This user account is deactivated.', 403);
+    }
+
+    // GRANT ACCESS TO PROTECTED ROUTE
+    req.user = currentUser;
+    next();
   }
-
-  // 2) Verify token
-  let decoded;
-  try {
-    decoded = jwt.verify(token, env.JWT_ACCESS_SECRET) as { id: string; iat: number };
-  } catch {
-    return errorResponse(res, 'Invalid token or token expired', 401);
-  }
-
-  // 3) Check if user still exists
-  const currentUser = await User.findById(decoded.id).select('+password');
-  if (!currentUser) {
-    return errorResponse(res, 'The user belonging to this token no longer exists.', 401);
-  }
-
-  // 4) Check if user changed password after the token was issued
-  // (Optional: Implement passwordChangedAt check if needed)
-
-  // GRANT ACCESS TO PROTECTED ROUTE
-  req.user = currentUser;
-  next();
-});
+);
 
 /**
  * Middleware to restrict access based on user roles.
@@ -57,3 +65,8 @@ export const restrictTo = (...roles: string[]): RequestHandler => {
     next();
   };
 };
+
+/**
+ * Alias for restrictTo to match requested strategy naming.
+ */
+export const authorize = restrictTo;

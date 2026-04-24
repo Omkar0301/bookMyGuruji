@@ -29,6 +29,10 @@ const envSchema = z.object({
   // Email
   SENDGRID_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().default('noreply@priestbooking.com'),
+  EMAIL_HOST: z.string().optional(),
+  EMAIL_PORT: z.coerce.number().optional(),
+  EMAIL_USERNAME: z.string().optional(),
+  EMAIL_PASSWORD: z.string().optional(),
 
   // Twilio
   TWILIO_ACCOUNT_SID: z.string().optional(),
@@ -37,6 +41,10 @@ const envSchema = z.object({
 
   // Client
   CLIENT_URL: z.string().default('http://localhost:3000'),
+
+  // Google OAuth
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
 
   // Platform
   PLATFORM_FEE_PERCENT: z.coerce.number().default(10),
