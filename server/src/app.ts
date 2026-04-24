@@ -42,7 +42,7 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-app.use('/api/v1', apiLimiter);
+app.use('/api', apiLimiter);
 
 // ────────────────────────────────────────────────────────────────
 // Body parsing & logging
@@ -76,7 +76,7 @@ app.get('/health', async (_req, res) => {
 // API Routes
 // ────────────────────────────────────────────────────────────────
 
-app.use('/api/v1', apiRouter);
+app.use('/api', apiRouter);
 
 // ────────────────────────────────────────────────────────────────
 // 404 handler

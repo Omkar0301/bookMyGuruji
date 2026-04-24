@@ -1,12 +1,35 @@
+import http from 'http';
+import { Server } from 'socket.io';
 import app from './app';
 import { env, connectDB } from './config';
 import { logger } from './utils/logger';
 
 const startServer = async (): Promise<void> => {
-  // Connect to MongoDB
+  // 1. Connect to MongoDB
   await connectDB();
 
-  const server = app.listen(env.PORT, () => {
+  // 2. Create HTTP Server
+  const server = http.createServer(app);
+
+  // 3. Initialize Socket.io
+  const io = new Server(server, {
+    cors: {
+      origin: env.CLIENT_URL,
+      credentials: true,
+    },
+  });
+
+  // Socket.io basic connection handling
+  io.on('connection', (socket) => {
+    logger.info(`🔌 Socket connected: ${socket.id}`);
+
+    socket.on('disconnect', () => {
+      logger.info(`🔌 Socket disconnected: ${socket.id}`);
+    });
+  });
+
+  // 4. Listen on PORT
+  server.listen(env.PORT, () => {
     logger.info(`🚀 Server running in ${env.NODE_ENV} mode on port ${env.PORT}`);
     logger.info(`📋 Health check: http://localhost:${env.PORT}/health`);
   });

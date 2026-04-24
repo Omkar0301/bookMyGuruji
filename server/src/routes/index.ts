@@ -1,10 +1,17 @@
 import { Router } from 'express';
 import authRoutes from './auth.routes';
+import userRoutes from './user.routes';
+import priestRoutes from './priest.routes';
+import bookingRoutes from './booking.routes';
+import paymentRoutes from './payment.routes';
+import reviewRoutes from './review.routes';
+import adminRoutes from './admin.routes';
+import uploadRoutes from './upload.routes';
 
 const router = Router();
 
 /**
- * @route   GET /api/v1/ping
+ * @route   GET /api/ping
  * @desc    Liveness check
  * @access  Public
  */
@@ -12,17 +19,13 @@ router.get('/ping', (_req, res) => {
   res.status(200).json({ success: true, message: 'pong' });
 });
 
-/**
- * @route   /api/v1/auth
- * @desc    Authentication routes
- */
 router.use('/auth', authRoutes);
-
-// TODO: router.use('/users', userRoutes);
-// TODO: router.use('/priests', priestRoutes);
-// TODO: router.use('/bookings', bookingRoutes);
-// TODO: router.use('/payments', paymentRoutes);
-// TODO: router.use('/reviews', reviewRoutes);
-// TODO: router.use('/notifications', notificationRoutes);
+router.use('/users', userRoutes);
+router.use('/priests', priestRoutes);
+router.use('/bookings', bookingRoutes);
+router.use('/payments', paymentRoutes);
+router.use('/reviews', reviewRoutes);
+router.use('/admin', adminRoutes);
+router.use('/upload', uploadRoutes);
 
 export default router;
