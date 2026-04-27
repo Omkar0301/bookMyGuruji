@@ -12,7 +12,12 @@
           "name": "Register User",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": {\n    \"first\": \"John\",\n    \"last\": \"Doe\"\n  },\n  \"email\": \"john@example.com\",\n  \"phone\": \"1234567890\",\n  \"password\": \"Password@123\"\n}"
@@ -28,7 +33,12 @@
           "name": "Register Priest",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": {\n    \"first\": \"Priest\",\n    \"last\": \"Doe\"\n  },\n  \"email\": \"priest@example.com\",\n  \"phone\": \"9876543210\",\n  \"password\": \"Password@123\"\n}"
@@ -59,7 +69,12 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"Password@123\"\n}"
@@ -106,7 +121,12 @@
               "raw": "{{baseUrl}}/api/v1/auth/verify-email/:token",
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "auth", "verify-email", ":token"],
-              "variable": [{ "key": "token", "value": "token_here" }]
+              "variable": [
+                {
+                  "key": "token",
+                  "value": "token_here"
+                }
+              ]
             }
           }
         },
@@ -114,7 +134,12 @@
           "name": "Forgot Password",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"john@example.com\"\n}"
@@ -130,7 +155,12 @@
           "name": "Reset Password",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"password\": \"NewPassword@123\"\n}"
@@ -139,7 +169,12 @@
               "raw": "{{baseUrl}}/api/v1/auth/reset-password/:token",
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "auth", "reset-password", ":token"],
-              "variable": [{ "key": "token", "value": "token_here" }]
+              "variable": [
+                {
+                  "key": "token",
+                  "value": "token_here"
+                }
+              ]
             }
           }
         },
@@ -148,7 +183,13 @@
           "request": {
             "auth": {
               "type": "bearer",
-              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
             },
             "method": "GET",
             "header": [],
@@ -164,7 +205,13 @@
           "request": {
             "auth": {
               "type": "bearer",
-              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
             },
             "method": "POST",
             "header": [],
@@ -220,15 +267,49 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "priests"],
               "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "20" },
-                { "key": "city", "value": "Mumbai", "disabled": true },
-                { "key": "ceremony", "value": "Vivah", "disabled": true },
-                { "key": "language", "value": "Hindi", "disabled": true },
-                { "key": "minRating", "value": "4", "disabled": true },
-                { "key": "maxPrice", "value": "10000", "disabled": true },
-                { "key": "search", "value": "", "disabled": true },
-                { "key": "sort", "value": "-rating.average", "disabled": true }
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "city",
+                  "value": "Mumbai",
+                  "disabled": true
+                },
+                {
+                  "key": "ceremony",
+                  "value": "Vivah",
+                  "disabled": true
+                },
+                {
+                  "key": "language",
+                  "value": "Hindi",
+                  "disabled": true
+                },
+                {
+                  "key": "minRating",
+                  "value": "4",
+                  "disabled": true
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "10000",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "-rating.average",
+                  "disabled": true
+                }
               ]
             }
           }
@@ -256,11 +337,28 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "priests", "nearby"],
               "query": [
-                { "key": "lat", "value": "19.0760" },
-                { "key": "lng", "value": "72.8777" },
-                { "key": "radiusKm", "value": "25" },
-                { "key": "page", "value": "1", "disabled": true },
-                { "key": "limit", "value": "20", "disabled": true }
+                {
+                  "key": "lat",
+                  "value": "19.0760"
+                },
+                {
+                  "key": "lng",
+                  "value": "72.8777"
+                },
+                {
+                  "key": "radiusKm",
+                  "value": "25"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true
+                }
               ]
             }
           }
@@ -312,10 +410,21 @@
           "request": {
             "auth": {
               "type": "bearer",
-              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
             },
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"bio\": \"Experienced Vedic priest with 15+ years of experience in traditional ceremonies.\",\n  \"specialisations\": [\"Vivah\", \"Griha Pravesh\", \"Satyanarayan Katha\", \"Mundan\"],\n  \"languages\": [\"Hindi\", \"Sanskrit\", \"English\"],\n  \"experience\": 15,\n  \"education\": \"Banaras Hindu University\",\n  \"travelRadius\": 50,\n  \"serviceAreas\": [\"Mumbai\", \"Pune\", \"Thane\", \"Navi Mumbai\"],\n  \"isAvailable\": true\n}"
@@ -345,10 +454,21 @@
           "request": {
             "auth": {
               "type": "bearer",
-              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
             },
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"services\": [\n    {\n      \"name\": \"Vivah\",\n      \"description\": \"Complete traditional wedding ceremony\",\n      \"basePriceINR\": 11000,\n      \"duration\": 3,\n      \"includesMaterials\": true\n    },\n    {\n      \"name\": \"Griha Pravesh\",\n      \"description\": \"Housewarming puja\",\n      \"basePriceINR\": 5100,\n      \"duration\": 2,\n      \"includesMaterials\": false\n    },\n    {\n      \"name\": \"Satyanarayan Katha\",\n      \"description\": \"Devotional katha with puja\",\n      \"basePriceINR\": 3500,\n      \"duration\": 1.5,\n      \"includesMaterials\": false\n    }\n  ]\n}"
@@ -383,8 +503,14 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "priests", "availability", "{{priestProfileId}}"],
               "query": [
-                { "key": "fromDate", "value": "2026-05-01" },
-                { "key": "toDate", "value": "2026-05-07" }
+                {
+                  "key": "fromDate",
+                  "value": "2026-05-01"
+                },
+                {
+                  "key": "toDate",
+                  "value": "2026-05-07"
+                }
               ]
             }
           }
@@ -406,10 +532,21 @@
           "request": {
             "auth": {
               "type": "bearer",
-              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
             },
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"weeklySchedule\": [\n    { \"dayOfWeek\": 1, \"slots\": [{ \"startTime\": \"09:00\", \"endTime\": \"13:00\" }, { \"startTime\": \"14:00\", \"endTime\": \"18:00\" }] },\n    { \"dayOfWeek\": 2, \"slots\": [{ \"startTime\": \"09:00\", \"endTime\": \"13:00\" }, { \"startTime\": \"14:00\", \"endTime\": \"18:00\" }] },\n    { \"dayOfWeek\": 3, \"slots\": [{ \"startTime\": \"09:00\", \"endTime\": \"13:00\" }, { \"startTime\": \"14:00\", \"endTime\": \"18:00\" }] },\n    { \"dayOfWeek\": 4, \"slots\": [{ \"startTime\": \"09:00\", \"endTime\": \"13:00\" }, { \"startTime\": \"14:00\", \"endTime\": \"18:00\" }] },\n    { \"dayOfWeek\": 5, \"slots\": [{ \"startTime\": \"09:00\", \"endTime\": \"13:00\" }, { \"startTime\": \"14:00\", \"endTime\": \"18:00\" }] },\n    { \"dayOfWeek\": 6, \"slots\": [{ \"startTime\": \"10:00\", \"endTime\": \"14:00\" }] }\n  ]\n}"
@@ -438,10 +575,21 @@
           "request": {
             "auth": {
               "type": "bearer",
-              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
             },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"date\": \"2026-05-15\",\n  \"type\": \"blocked\",\n  \"reason\": \"Personal holiday\"\n}"
@@ -470,10 +618,21 @@
           "request": {
             "auth": {
               "type": "bearer",
-              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
             },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"date\": \"2026-05-18\",\n  \"type\": \"available\",\n  \"slots\": [\n    { \"startTime\": \"06:00\", \"endTime\": \"10:00\" },\n    { \"startTime\": \"16:00\", \"endTime\": \"20:00\" }\n  ],\n  \"reason\": \"Special early morning and evening availability\"\n}"
@@ -486,20 +645,390 @@
           }
         }
       ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"priestId\": \"{{priestId}}\",\n  \"ceremony\": {\n    \"name\": \"Vivah\",\n    \"duration\": 2.5\n  },\n  \"scheduledDate\": \"2026-10-15T00:00:00Z\",\n  \"scheduledTime\": \"09:30\",\n  \"venue\": {\n    \"address\": \"123 Main St\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"pincode\": \"400001\",\n    \"coordinates\": [\n      72.8777,\n      19.076\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings"]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200/201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);",
+                  "pm.environment.set('bookingId', pm.response.json().data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get My Bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings"]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200/201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Booking by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "{{bookingId}}"]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200/201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Priest Confirm Booking",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "{{bookingId}}", "confirm"]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200/201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Priest Decline Booking",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Not available on that date due to emergency\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/decline",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "{{bookingId}}", "decline"]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200/201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Priest Complete Booking",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "{{bookingId}}", "complete"]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200/201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Changed my mind\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "{{bookingId}}", "cancel"]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200/201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dispute Booking",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Priest did not arrive on time\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/dispute",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "{{bookingId}}", "dispute"]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200/201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin View All Bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/bookings?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "bookings"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200/201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "event": [
     {
       "listen": "prerequest",
-      "script": { "type": "text/javascript", "exec": [""] }
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
     },
     {
       "listen": "test",
-      "script": { "type": "text/javascript", "exec": [""] }
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
     }
   ],
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:5000" },
-    { "key": "priestProfileId", "value": "" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "priestProfileId",
+      "value": ""
+    }
   ]
 }
