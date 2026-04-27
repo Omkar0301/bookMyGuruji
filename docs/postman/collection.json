@@ -188,6 +188,304 @@
           }
         }
       ]
+    },
+    {
+      "name": "Priests",
+      "item": [
+        {
+          "name": "Search Priests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);",
+                  "pm.test('has data array', () => pm.expect(pm.response.json().data).to.be.an('array'));",
+                  "pm.test('has pagination', () => pm.expect(pm.response.json()).to.have.property('pagination'));",
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.length > 0) {",
+                  "  pm.environment.set('priestProfileId', res.data[0]._id || res.data[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/priests?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "priests"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "city", "value": "Mumbai", "disabled": true },
+                { "key": "ceremony", "value": "Vivah", "disabled": true },
+                { "key": "language", "value": "Hindi", "disabled": true },
+                { "key": "minRating", "value": "4", "disabled": true },
+                { "key": "maxPrice", "value": "10000", "disabled": true },
+                { "key": "search", "value": "", "disabled": true },
+                { "key": "sort", "value": "-rating.average", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Nearby Priests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);",
+                  "pm.test('has data array', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/priests/nearby?lat=19.0760&lng=72.8777&radiusKm=25",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "priests", "nearby"],
+              "query": [
+                { "key": "lat", "value": "19.0760" },
+                { "key": "lng", "value": "72.8777" },
+                { "key": "radiusKm", "value": "25" },
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "limit", "value": "20", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Priest Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);",
+                  "pm.test('has data', () => pm.expect(pm.response.json()).to.have.property('data'));",
+                  "pm.test('no bankDetails exposed', () => {",
+                  "  const data = pm.response.json().data;",
+                  "  pm.expect(data).to.not.have.property('bankDetails');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/priests/{{priestProfileId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "priests", "{{priestProfileId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Own Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);",
+                  "pm.test('profile updated', () => pm.expect(pm.response.json().message).to.eql('Profile updated'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+            },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Experienced Vedic priest with 15+ years of experience in traditional ceremonies.\",\n  \"specialisations\": [\"Vivah\", \"Griha Pravesh\", \"Satyanarayan Katha\", \"Mundan\"],\n  \"languages\": [\"Hindi\", \"Sanskrit\", \"English\"],\n  \"experience\": 15,\n  \"education\": \"Banaras Hindu University\",\n  \"travelRadius\": 50,\n  \"serviceAreas\": [\"Mumbai\", \"Pune\", \"Thane\", \"Navi Mumbai\"],\n  \"isAvailable\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/priests/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "priests", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Services & Pricing",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);",
+                  "pm.test('services updated', () => pm.expect(pm.response.json().message).to.eql('Services updated'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+            },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"services\": [\n    {\n      \"name\": \"Vivah\",\n      \"description\": \"Complete traditional wedding ceremony\",\n      \"basePriceINR\": 11000,\n      \"duration\": 3,\n      \"includesMaterials\": true\n    },\n    {\n      \"name\": \"Griha Pravesh\",\n      \"description\": \"Housewarming puja\",\n      \"basePriceINR\": 5100,\n      \"duration\": 2,\n      \"includesMaterials\": false\n    },\n    {\n      \"name\": \"Satyanarayan Katha\",\n      \"description\": \"Devotional katha with puja\",\n      \"basePriceINR\": 3500,\n      \"duration\": 1.5,\n      \"includesMaterials\": false\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/priests/services",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "priests", "services"]
+            }
+          }
+        },
+        {
+          "name": "Get Availability Slots",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);",
+                  "pm.test('has data', () => pm.expect(pm.response.json()).to.have.property('data'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/priests/availability/{{priestProfileId}}?fromDate=2026-05-01&toDate=2026-05-07",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "priests", "availability", "{{priestProfileId}}"],
+              "query": [
+                { "key": "fromDate", "value": "2026-05-01" },
+                { "key": "toDate", "value": "2026-05-07" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Weekly Schedule",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+            },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"weeklySchedule\": [\n    { \"dayOfWeek\": 1, \"slots\": [{ \"startTime\": \"09:00\", \"endTime\": \"13:00\" }, { \"startTime\": \"14:00\", \"endTime\": \"18:00\" }] },\n    { \"dayOfWeek\": 2, \"slots\": [{ \"startTime\": \"09:00\", \"endTime\": \"13:00\" }, { \"startTime\": \"14:00\", \"endTime\": \"18:00\" }] },\n    { \"dayOfWeek\": 3, \"slots\": [{ \"startTime\": \"09:00\", \"endTime\": \"13:00\" }, { \"startTime\": \"14:00\", \"endTime\": \"18:00\" }] },\n    { \"dayOfWeek\": 4, \"slots\": [{ \"startTime\": \"09:00\", \"endTime\": \"13:00\" }, { \"startTime\": \"14:00\", \"endTime\": \"18:00\" }] },\n    { \"dayOfWeek\": 5, \"slots\": [{ \"startTime\": \"09:00\", \"endTime\": \"13:00\" }, { \"startTime\": \"14:00\", \"endTime\": \"18:00\" }] },\n    { \"dayOfWeek\": 6, \"slots\": [{ \"startTime\": \"10:00\", \"endTime\": \"14:00\" }] }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/priests/availability",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "priests", "availability"]
+            }
+          }
+        },
+        {
+          "name": "Add Availability Override (Block Date)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-05-15\",\n  \"type\": \"blocked\",\n  \"reason\": \"Personal holiday\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/priests/availability/override",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "priests", "availability", "override"]
+            }
+          }
+        },
+        {
+          "name": "Add Availability Override (Open Date)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-05-18\",\n  \"type\": \"available\",\n  \"slots\": [\n    { \"startTime\": \"06:00\", \"endTime\": \"10:00\" },\n    { \"startTime\": \"16:00\", \"endTime\": \"20:00\" }\n  ],\n  \"reason\": \"Special early morning and evening availability\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/priests/availability/override",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "priests", "availability", "override"]
+            }
+          }
+        }
+      ]
     }
   ],
   "event": [
@@ -200,5 +498,8 @@
       "script": { "type": "text/javascript", "exec": [""] }
     }
   ],
-  "variable": [{ "key": "baseUrl", "value": "http://localhost:5000" }]
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "priestProfileId", "value": "" }
+  ]
 }
