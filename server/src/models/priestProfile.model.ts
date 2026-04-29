@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import { VerificationStatus } from '../constants/enums';
 
 // ────────────────────────────────────────────────────────────────
 // Sub-interfaces
@@ -42,7 +43,7 @@ export interface IPriestProfile extends Document {
   travelRadius: number;
   serviceAreas: string[];
   rating: { average: number; count: number };
-  verificationStatus: 'pending' | 'approved' | 'rejected';
+  verificationStatus: VerificationStatus;
   verificationNotes: string;
   bankDetails: IBankDetails;
   totalEarnings: number;
@@ -146,10 +147,10 @@ const priestProfileSchema = new Schema<IPriestProfile>(
     verificationStatus: {
       type: String,
       enum: {
-        values: ['pending', 'approved', 'rejected'],
+        values: Object.values(VerificationStatus),
         message: '{VALUE} is not a valid verification status',
       },
-      default: 'pending',
+      default: VerificationStatus.PENDING,
     },
     verificationNotes: {
       type: String,
@@ -173,10 +174,13 @@ const priestProfileSchema = new Schema<IPriestProfile>(
         ret.id = (ret._id as mongoose.Types.ObjectId).toString();
         delete ret._id;
         delete ret.__v;
-        // Never expose bank account number in API responses
+        // Mask bank account number to last 4 digits in API responses
         if (ret.bankDetails) {
           const bankDetails = ret.bankDetails as Record<string, unknown>;
-          delete bankDetails.accountNumber;
+          if (bankDetails.accountNumber && typeof bankDetails.accountNumber === 'string') {
+            const acc = bankDetails.accountNumber;
+            bankDetails.accountNumber = acc.length >= 4 ? `****${acc.slice(-4)}` : '****';
+          }
         }
         return ret;
       },

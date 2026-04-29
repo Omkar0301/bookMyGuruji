@@ -1,4 +1,5 @@
 import moment from 'moment';
+import { BookingStatus } from '../constants/enums';
 import { Availability, ITimeSlot } from '../models';
 import { Booking } from '../models';
 import { AppError } from '../utils';
@@ -124,7 +125,7 @@ export class AvailabilityService {
     // Fetch blocking bookings in the date range
     const bookings = await Booking.find({
       priest: priestId,
-      status: { $in: ['pending', 'confirmed', 'in_progress'] },
+      status: { $in: [BookingStatus.PENDING, BookingStatus.CONFIRMED, BookingStatus.IN_PROGRESS] },
       scheduledDate: { $gte: from.toDate(), $lte: to.toDate() },
     })
       .select('scheduledDate scheduledTime ceremony.duration')

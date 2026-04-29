@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import { AvailabilityStatus } from '../constants/enums';
 
 // ────────────────────────────────────────────────────────────────
 // Sub-interfaces
@@ -16,7 +17,7 @@ export interface IWeeklyScheduleEntry {
 
 export interface IOverride {
   date: Date;
-  type: 'blocked' | 'available';
+  type: AvailabilityStatus;
   slots: ITimeSlot[];
   reason: string;
 }
@@ -77,7 +78,7 @@ const overrideSchema = new Schema<IOverride>(
     type: {
       type: String,
       enum: {
-        values: ['blocked', 'available'],
+        values: Object.values(AvailabilityStatus),
         message: '{VALUE} is not a valid override type',
       },
       required: true,

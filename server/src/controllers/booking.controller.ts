@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { BookingService } from '../services/booking.service';
+import { UserRole } from '../constants/enums';
 import { PriestProfile } from '../models/priestProfile.model';
 import { catchAsync } from '../utils/catchAsync';
 import { successResponse, paginatedResponse, errorResponse } from '../utils/response';
@@ -36,7 +37,7 @@ export class BookingController {
     }
 
     let priestProfileId = null;
-    if (req.user.role === 'priest') {
+    if (req.user.role === UserRole.PRIEST) {
       priestProfileId = await getPriestProfileId(req.user.id);
     }
 
@@ -60,7 +61,7 @@ export class BookingController {
     if (req.user.role === 'user' && booking.user._id.toString() !== req.user.id) {
       return errorResponse(res, 'Forbidden', 403);
     }
-    if (req.user.role === 'priest') {
+    if (req.user.role === UserRole.PRIEST) {
       const priestProfileId = await getPriestProfileId(req.user.id);
       if (booking.priest._id.toString() !== priestProfileId) {
         return errorResponse(res, 'Forbidden', 403);
@@ -74,7 +75,7 @@ export class BookingController {
    * PATCH /bookings/:id/confirm — Priest confirms a booking
    */
   static confirmBooking = catchAsync(async (req: Request, res: Response) => {
-    if (!req.user || !req.user.id || req.user.role !== 'priest') {
+    if (!req.user || !req.user.id || req.user.role !== UserRole.PRIEST) {
       return errorResponse(res, 'Forbidden', 403);
     }
 
@@ -89,7 +90,7 @@ export class BookingController {
    * PATCH /bookings/:id/decline — Priest declines a booking
    */
   static declineBooking = catchAsync(async (req: Request, res: Response) => {
-    if (!req.user || !req.user.id || req.user.role !== 'priest') {
+    if (!req.user || !req.user.id || req.user.role !== UserRole.PRIEST) {
       return errorResponse(res, 'Forbidden', 403);
     }
 
@@ -108,7 +109,7 @@ export class BookingController {
    * PATCH /bookings/:id/complete — Priest marks a booking as complete
    */
   static completeBooking = catchAsync(async (req: Request, res: Response) => {
-    if (!req.user || !req.user.id || req.user.role !== 'priest') {
+    if (!req.user || !req.user.id || req.user.role !== UserRole.PRIEST) {
       return errorResponse(res, 'Forbidden', 403);
     }
 
@@ -128,7 +129,7 @@ export class BookingController {
     }
 
     let priestProfileId = null;
-    if (req.user.role === 'priest') {
+    if (req.user.role === UserRole.PRIEST) {
       priestProfileId = await getPriestProfileId(req.user.id);
     }
 
@@ -151,7 +152,7 @@ export class BookingController {
     }
 
     let priestProfileId = null;
-    if (req.user.role === 'priest') {
+    if (req.user.role === UserRole.PRIEST) {
       priestProfileId = await getPriestProfileId(req.user.id);
     }
 

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { VerificationStatus, UserRole } from '../constants/enums';
 import { PriestProfile, IPriestProfile, User } from '../models';
 import { AppError } from '../utils';
 
@@ -54,7 +55,7 @@ export class PriestService {
     const { city, ceremony, language, minRating, maxPrice, search, sort, page, limit } = filters;
 
     const query: Record<string, unknown> = {
-      verificationStatus: 'approved',
+      verificationStatus: VerificationStatus.APPROVED,
       isAvailable: true,
     };
 
@@ -130,7 +131,7 @@ export class PriestService {
 
     // Step 1: Find user IDs near the location who are priests
     const nearbyUsers = await User.find({
-      role: 'priest',
+      role: UserRole.PRIEST,
       isActive: true,
       'address.location': {
         $nearSphere: {
@@ -154,7 +155,7 @@ export class PriestService {
     // Step 2: Find priest profiles for those users
     const query = {
       user: { $in: userIds },
-      verificationStatus: 'approved' as const,
+      verificationStatus: VerificationStatus.APPROVED,
       isAvailable: true,
     };
 
@@ -193,7 +194,7 @@ export class PriestService {
       throw new AppError('Priest not found', 404);
     }
 
-    if (priest.verificationStatus !== 'approved') {
+    if (priest.verificationStatus !== VerificationStatus.APPROVED) {
       throw new AppError('Priest profile is not available', 404);
     }
 

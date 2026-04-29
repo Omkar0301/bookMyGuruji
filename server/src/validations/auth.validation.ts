@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { UserRole } from '../constants/enums';
 
 /**
  * Zod schemas for authentication request validation.
@@ -19,7 +20,7 @@ export const registerSchema = z.object({
         .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
         .regex(/[0-9]/, 'Password must contain at least one number')
         .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
-      role: z.enum(['user', 'priest']).default('user'),
+      role: z.enum([UserRole.USER, UserRole.PRIEST]).default(UserRole.USER),
     })
     .strict(),
 });

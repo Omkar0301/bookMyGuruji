@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import { PaymentStatus, PaymentType } from '../constants/enums';
 
 // ────────────────────────────────────────────────────────────────
 // Interface
@@ -12,8 +13,8 @@ export interface IPayment extends Document {
   razorpaySignature: string;
   amount: number;
   currency: string;
-  type: 'advance' | 'balance' | 'refund';
-  status: 'pending' | 'captured' | 'failed' | 'refunded';
+  type: PaymentType;
+  status: PaymentStatus;
   refund: {
     refundId: string;
     amount: number;
@@ -52,7 +53,7 @@ const paymentSchema = new Schema<IPayment>(
     type: {
       type: String,
       enum: {
-        values: ['advance', 'balance', 'refund'],
+        values: Object.values(PaymentType),
         message: '{VALUE} is not a valid payment type',
       },
       required: [true, 'Payment type is required'],
@@ -60,10 +61,10 @@ const paymentSchema = new Schema<IPayment>(
     status: {
       type: String,
       enum: {
-        values: ['pending', 'captured', 'failed', 'refunded'],
+        values: Object.values(PaymentStatus),
         message: '{VALUE} is not a valid payment status',
       },
-      default: 'pending',
+      default: PaymentStatus.PENDING,
     },
     refund: {
       refundId: { type: String },

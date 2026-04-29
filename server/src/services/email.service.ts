@@ -43,9 +43,11 @@ export class Email {
   }
 
   // Send the actual email
-  private async send(template: string, subject: string): Promise<void> {
-    // 1) Render HTML based on a pug template
-    // Note: Adjust path based on your build structure
+  private async send(
+    template: string,
+    subject: string,
+    data: Record<string, unknown> = {}
+  ): Promise<void> {
     const templatePath = path.join(__dirname, '..', 'views', 'emails', `${template}.pug`);
 
     const html = pug.renderFile(templatePath, {
@@ -53,6 +55,7 @@ export class Email {
       email: this.email,
       url: this.url,
       subject,
+      ...data,
     });
 
     // 2) Define email options
@@ -82,5 +85,13 @@ export class Email {
 
   async sendPasswordChanged(): Promise<void> {
     await this.send('passwordChanged', 'Your password has been changed');
+  }
+
+  async sendAccountApproved(): Promise<void> {
+    await this.send('accountApproved', 'Your Priest Account has been Approved! 🙏');
+  }
+
+  async sendAccountRejected(reason: string): Promise<void> {
+    await this.send('accountRejected', 'Update on your Priest Account Application', { reason });
   }
 }

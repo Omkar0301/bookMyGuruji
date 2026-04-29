@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { AvailabilityStatus } from '../constants/enums';
 
 // ────────────────────────────────────────────────────────────────
 // HH:MM time format regex
@@ -137,7 +138,7 @@ export const availabilityOverrideSchema = z.object({
   body: z
     .object({
       date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD'),
-      type: z.enum(['blocked', 'available'], {
+      type: z.nativeEnum(AvailabilityStatus, {
         errorMap: () => ({ message: 'Type must be "blocked" or "available"' }),
       }),
       slots: z.array(timeSlotSchema).optional().default([]),

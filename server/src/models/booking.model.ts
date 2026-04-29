@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import { BookingStatus } from '../constants/enums';
 
 // ────────────────────────────────────────────────────────────────
 // Sub-interfaces
@@ -52,7 +53,7 @@ export interface IBooking extends Document {
   scheduledTime: string;
   venue: IVenue;
   pricing: IPricing;
-  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'disputed';
+  status: BookingStatus;
   statusHistory: IStatusHistoryEntry[];
   cancellation: ICancellation;
   specialRequests: string;
@@ -125,10 +126,10 @@ const bookingSchema = new Schema<IBooking>(
     status: {
       type: String,
       enum: {
-        values: ['pending', 'confirmed', 'in_progress', 'completed', 'cancelled', 'disputed'],
+        values: Object.values(BookingStatus),
         message: '{VALUE} is not a valid booking status',
       },
-      default: 'pending',
+      default: BookingStatus.PENDING,
       index: true,
     },
     statusHistory: [

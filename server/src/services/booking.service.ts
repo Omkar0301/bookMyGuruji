@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { BookingStatus, UserRole, VerificationStatus } from '../constants/enums';
 import { Booking, IBooking } from '../models/booking.model';
 import { PriestProfile } from '../models/priestProfile.model';
 import { Availability } from '../models/availability.model';
@@ -36,7 +37,11 @@ export class BookingService {
 
       // 1. Validate priest exists and is approved
       const priest = await PriestProfile.findById(data.priestId).session(session);
-      if (!priest || priest.verificationStatus !== 'approved' || !priest.isAvailable) {
+      if (
+        !priest ||
+        priest.verificationStatus !== VerificationStatus.APPROVED ||
+        !priest.isAvailable
+      ) {
         throw new AppError('Priest is not available for booking', 400);
       }
 
@@ -98,7 +103,7 @@ export class BookingService {
 
       // 4. Generate bookingNumber (handled in pre-save hook of the schema automatically)
 
-      // 5. Create booking with status='pending'
+      // 5. Create booking with status=BookingStatus.PENDING
       const newBooking = new Booking({
         user: userId,
         priest: data.priestId,
@@ -119,7 +124,7 @@ export class BookingService {
           advancePaid,
           balanceDue,
         },
-        status: 'pending',
+        status: BookingStatus.PENDING,
       });
 
       booking = await newBooking.save({ session });
@@ -145,24 +150,24 @@ export class BookingService {
     userRole: string,
     priestProfileId?: string
   ): Promise<IBooking[]> {
-    if (userRole === 'priest' && priestProfileId) {
+    if (userRole === UserRole.PRIEST && priestProfileId) {
       return Booking.find({ priest: priestProfileId })
         .sort('-createdAt')
-        .populate('user', 'name email')
+        .populate(UserRole.USER, 'name email')
         .lean() as unknown as IBooking[];
     }
     return Booking.find({ user: userId })
       .sort('-createdAt')
-      .populate('priest', 'user bio')
+      .populate(UserRole.PRIEST, 'user bio')
       .lean() as unknown as IBooking[];
   }
 
   static async getBookingById(bookingId: string): Promise<IBooking> {
     const booking = (await Booking.findById(bookingId)
-      .populate('user', 'name email phone')
+      .populate(UserRole.USER, 'name email phone')
       .populate({
-        path: 'priest',
-        populate: { path: 'user', select: 'name email phone' },
+        path: UserRole.PRIEST,
+        populate: { path: UserRole.USER, select: 'name email phone' },
       })
       .lean()) as unknown as IBooking;
     if (!booking) throw new AppError('Booking not found', 404);
@@ -177,13 +182,13 @@ export class BookingService {
       throw new AppError('You are not authorized to confirm this booking', 403);
     }
 
-    if (booking.status !== 'pending') {
+    if (booking.status !== BookingStatus.PENDING) {
       throw new AppError(`Cannot confirm a booking that is ${booking.status}`, 400);
     }
 
-    booking.status = 'confirmed';
+    booking.status = BookingStatus.CONFIRMED;
     booking.statusHistory.push({
-      status: 'confirmed',
+      status: BookingStatus.CONFIRMED,
       updatedAt: new Date(),
       note: 'Priest accepted the booking',
     });
@@ -210,19 +215,19 @@ export class BookingService {
         throw new AppError('You are not authorized to decline this booking', 403);
       }
 
-      if (booking.status !== 'pending') {
+      if (booking.status !== BookingStatus.PENDING) {
         throw new AppError(`Cannot decline a booking that is ${booking.status}`, 400);
       }
 
-      booking.status = 'cancelled';
+      booking.status = BookingStatus.CANCELLED;
       booking.statusHistory.push({
-        status: 'cancelled',
+        status: BookingStatus.CANCELLED,
         updatedAt: new Date(),
         note: `Declined by priest: ${reason}`,
       });
 
       booking.cancellation = {
-        cancelledBy: 'priest',
+        cancelledBy: UserRole.PRIEST,
         reason,
         refundAmount: booking.pricing.advancePaid, // 100% refund
         cancelledAt: new Date(),
@@ -264,13 +269,16 @@ export class BookingService {
       throw new AppError('You are not authorized to complete this booking', 403);
     }
 
-    if (booking.status !== 'confirmed' && booking.status !== 'in_progress') {
+    if (
+      booking.status !== BookingStatus.CONFIRMED &&
+      booking.status !== BookingStatus.IN_PROGRESS
+    ) {
       throw new AppError(`Cannot complete a booking that is ${booking.status}`, 400);
     }
 
-    booking.status = 'completed';
+    booking.status = BookingStatus.COMPLETED;
     booking.statusHistory.push({
-      status: 'completed',
+      status: BookingStatus.COMPLETED,
       updatedAt: new Date(),
       note: 'Priest marked ceremony as completed',
     });
@@ -295,28 +303,32 @@ export class BookingService {
       booking = await Booking.findById(bookingId).session(session);
       if (!booking) throw new AppError('Booking not found', 404);
 
-      let cancelledBy = 'user';
-      if (role === 'priest') {
+      let cancelledBy = UserRole.USER;
+      if (role === UserRole.PRIEST) {
         if (booking.priest.toString() !== priestProfileId) {
           throw new AppError('Forbidden', 403);
         }
-        cancelledBy = 'priest';
-      } else if (role === 'user') {
+        cancelledBy = UserRole.PRIEST;
+      } else if (role === UserRole.USER) {
         if (booking.user.toString() !== userId) {
           throw new AppError('Forbidden', 403);
         }
-        cancelledBy = 'user';
-      } else if (role === 'admin') {
-        cancelledBy = 'admin';
+        cancelledBy = UserRole.USER;
+      } else if (role === UserRole.ADMIN) {
+        cancelledBy = UserRole.ADMIN;
       }
 
-      if (['completed', 'cancelled', 'disputed'].includes(booking.status)) {
+      if (
+        [BookingStatus.COMPLETED, BookingStatus.CANCELLED, BookingStatus.DISPUTED].includes(
+          booking.status
+        )
+      ) {
         throw new AppError(`Booking is already ${booking.status}`, 400);
       }
 
       let refundAmount = 0;
 
-      if (cancelledBy === 'priest' || cancelledBy === 'admin') {
+      if (cancelledBy === UserRole.PRIEST || cancelledBy === UserRole.ADMIN) {
         // Priest or admin cancels -> full refund
         refundAmount = booking.pricing.advancePaid;
       } else {
@@ -338,9 +350,9 @@ export class BookingService {
         }
       }
 
-      booking.status = 'cancelled';
+      booking.status = BookingStatus.CANCELLED;
       booking.statusHistory.push({
-        status: 'cancelled',
+        status: BookingStatus.CANCELLED,
         updatedAt: new Date(),
         note: `Cancelled by ${cancelledBy}: ${reason}`,
       });
@@ -390,16 +402,16 @@ export class BookingService {
     const booking = await Booking.findById(bookingId);
     if (!booking) throw new AppError('Booking not found', 404);
 
-    if (role === 'user' && booking.user.toString() !== userId) {
+    if (role === UserRole.USER && booking.user.toString() !== userId) {
       throw new AppError('Forbidden', 403);
     }
-    if (role === 'priest' && booking.priest.toString() !== priestProfileId) {
+    if (role === UserRole.PRIEST && booking.priest.toString() !== priestProfileId) {
       throw new AppError('Forbidden', 403);
     }
 
-    booking.status = 'disputed';
+    booking.status = BookingStatus.DISPUTED;
     booking.statusHistory.push({
-      status: 'disputed',
+      status: BookingStatus.DISPUTED,
       updatedAt: new Date(),
       note: `Dispute raised by ${role}: ${reason}`,
     });
@@ -418,10 +430,10 @@ export class BookingService {
         .sort('-createdAt')
         .skip(skip)
         .limit(limit)
-        .populate('user', 'name email phone')
+        .populate(UserRole.USER, 'name email phone')
         .populate({
-          path: 'priest',
-          populate: { path: 'user', select: 'name email' },
+          path: UserRole.PRIEST,
+          populate: { path: UserRole.USER, select: 'name email' },
         })
         .lean() as unknown as IBooking[],
       Booking.countDocuments(),

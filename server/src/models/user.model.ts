@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { UserRole } from '../constants/enums';
 
 // ────────────────────────────────────────────────────────────────
 // Interface
@@ -11,7 +12,7 @@ export interface IUser extends Document {
   email: string;
   phone: string;
   password: string;
-  role: 'user' | 'priest' | 'admin';
+  role: UserRole;
   avatar: string;
   address: {
     street: string;
@@ -83,10 +84,10 @@ const userSchema = new Schema<IUser>(
     role: {
       type: String,
       enum: {
-        values: ['user', 'priest', 'admin'],
+        values: Object.values(UserRole),
         message: '{VALUE} is not a valid role',
       },
-      default: 'user',
+      default: UserRole.USER,
     },
     avatar: {
       type: String, // Cloudinary URL

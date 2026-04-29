@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { env } from '../config/env';
 import { User, IUser } from '../models/user.model';
 import { PriestProfile } from '../models/priestProfile.model';
+import { UserRole, VerificationStatus } from '../constants/enums';
 import { AppError } from '../utils';
 import { Email } from './email.service';
 
@@ -107,14 +108,14 @@ export class AuthService {
     userData: Record<string, unknown>
   ): Promise<{ user: IUser; accessToken: string; refreshToken: string }> {
     // Force role to priest
-    userData.role = 'priest';
+    userData.role = UserRole.PRIEST;
 
     const { user, accessToken, refreshToken } = await this.register(userData);
 
     // Create priest profile
     await PriestProfile.create({
       user: user.id,
-      verificationStatus: 'pending',
+      verificationStatus: VerificationStatus.PENDING,
     });
 
     return { user, accessToken, refreshToken };

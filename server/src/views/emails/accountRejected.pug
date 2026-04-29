@@ -1,0 +1,21 @@
+extends base
+
+block content
+  p Hi #{firstName},
+  p Thank you for applying to be a Priest on BookMyGuruji. 🙏
+  p Unfortunately, after reviewing your application, we are currently unable to approve your account for the following reason:
+  blockquote
+    p
+      em #{reason}
+  p Please do not be discouraged. You can update your profile with the required documents or information and contact our support team to re-evaluate your application.
+  table.btn.btn-primary(role='presentation', border='0', cellpadding='0', cellspacing='0')
+    tbody
+      tr
+        td(align='left')
+          table(role='presentation', border='0', cellpadding='0', cellspacing='0')
+            tbody
+              tr
+                td
+                  a(href=`${url}/priest/profile`, target='_blank') Update Your Profile
+  p If you believe this was a mistake, or have any questions, please reply to this email.
+  p - The BookMyGuruji Team

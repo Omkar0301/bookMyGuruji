@@ -1003,6 +1003,486 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Priest Verification",
+          "item": [
+            {
+              "name": "Get Pending Verifications",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/api/v1/admin/verifications",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Approve Priest Verification",
+              "request": {
+                "method": "PATCH",
+                "url": "{{baseUrl}}/api/v1/admin/verifications/{{priestId}}/approve",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Reject Priest Verification",
+              "request": {
+                "method": "PATCH",
+                "url": "{{baseUrl}}/api/v1/admin/verifications/{{priestId}}/reject",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Incomplete documents provided for background check.\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "User Management",
+          "item": [
+            {
+              "name": "Get Users",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/api/v1/admin/users?page=1&limit=20&role=user&isActive=true",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get User by ID",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/api/v1/admin/users/{{userId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Deactivate User",
+              "request": {
+                "method": "PATCH",
+                "url": "{{baseUrl}}/api/v1/admin/users/{{userId}}/deactivate",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Activate User",
+              "request": {
+                "method": "PATCH",
+                "url": "{{baseUrl}}/api/v1/admin/users/{{userId}}/activate",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Booking Management",
+          "item": [
+            {
+              "name": "Get All Bookings",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/api/v1/admin/bookings?page=1&limit=20&status=completed",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Booking by ID",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/api/v1/admin/bookings/{{bookingId}}",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Override Booking Status",
+              "request": {
+                "method": "PATCH",
+                "url": "{{baseUrl}}/api/v1/admin/bookings/{{bookingId}}/override-status",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"completed\",\n  \"adminNote\": \"Forced to complete by admin support request\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Dispute Resolution",
+          "item": [
+            {
+              "name": "Get Disputes",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/api/v1/admin/disputes",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Resolve Dispute",
+              "request": {
+                "method": "PATCH",
+                "url": "{{baseUrl}}/api/v1/admin/disputes/{{bookingId}}/resolve",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"resolution\": \"split\",\n  \"adminNote\": \"Priest was late, user gets 50% refund\",\n  \"userRefundPercent\": 50\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Analytics",
+          "item": [
+            {
+              "name": "Get Analytics Overview",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/api/v1/admin/analytics/overview",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Revenue Analytics",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/api/v1/admin/analytics/revenue?from=2024-01-01&to=2024-12-31",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Top Priests",
+              "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/api/v1/admin/analytics/top-priests?limit=10",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "event": [
