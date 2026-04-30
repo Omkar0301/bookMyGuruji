@@ -4,11 +4,13 @@ import { authApi } from '../api/authApi';
 import { setCredentials, logout as storeLogout, setLoading } from '../features/auth/authSlice';
 import { AxiosError } from 'axios';
 
+import { UserRole } from '../types/enums';
+
 // Define the User interface locally or import it if shared
 export interface User {
   id: string;
   email: string;
-  role: 'user' | 'priest' | 'admin';
+  role: UserRole;
   name: { first: string; last: string };
   avatar?: string;
   isEmailVerified: boolean;

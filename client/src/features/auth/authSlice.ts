@@ -1,9 +1,10 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { UserRole } from '../../types/enums';
 
 export interface User {
   id: string;
   email: string;
-  role: 'user' | 'priest' | 'admin';
+  role: UserRole;
   name: { first: string; last: string };
   avatar?: string;
   isEmailVerified: boolean;
