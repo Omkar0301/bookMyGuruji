@@ -1,11 +1,29 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../lib/axios';
-import { useAuthStore, type User as StoreUser } from '../store/authStore';
+import { useDispatch, useSelector } from 'react-redux';
+import { authApi } from '../api/authApi';
+import { setCredentials, logout as storeLogout, setLoading } from '../features/auth/authSlice';
 import { AxiosError } from 'axios';
 
-export const useAuth = (): {
-  user: StoreUser | null;
+// Define the User interface locally or import it if shared
+export interface User {
+  id: string;
+  email: string;
+  role: 'user' | 'priest' | 'admin';
+  name: { first: string; last: string };
+  avatar?: string;
+  isEmailVerified: boolean;
+}
+
+interface RootState {
+  auth: {
+    user: User | null;
+    isAuthenticated: boolean;
+    loading: boolean;
+  };
+}
+
+export interface AuthHookReturn {
+  user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentials: Record<string, unknown>) => Promise<{ success: boolean; message?: string }>;
@@ -19,29 +37,35 @@ export const useAuth = (): {
     token: string,
     password: string
   ) => Promise<{ success: boolean; message?: string }>;
-} => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { login: storeLogin, logout: storeLogout, user, isAuthenticated } = useAuthStore();
+}
+
+export const useAuth = (): AuthHookReturn => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const {
+    user,
+    isAuthenticated,
+    loading: isLoading,
+  } = useSelector((state: RootState) => state.auth);
 
   const login = async (
     credentials: Record<string, unknown>
   ): Promise<{ success: boolean; message?: string }> => {
-    setIsLoading(true);
+    dispatch(setLoading(true));
     try {
-      const { data } = await api.post('/auth/login', credentials);
+      const { data } = await authApi.login(credentials);
       const { user, accessToken } = data.data;
-      storeLogin(user, accessToken);
+      dispatch(setCredentials({ user, accessToken }));
       navigate('/dashboard');
       return { success: true };
     } catch (err: unknown) {
       const error = err as AxiosError<{ message: string }>;
       return {
         success: false,
-        message: error.response?.data?.message || 'Failed',
+        message: error.response?.data?.message || 'Login failed',
       };
     } finally {
-      setIsLoading(false);
+      dispatch(setLoading(false));
     }
   };
 
@@ -49,12 +73,14 @@ export const useAuth = (): {
     userData: Record<string, unknown>,
     isPriest = false
   ): Promise<{ success: boolean; message?: string }> => {
-    setIsLoading(true);
+    dispatch(setLoading(true));
     try {
-      const endpoint = isPriest ? '/auth/register/priest' : '/auth/register';
-      const { data } = await api.post(endpoint, userData);
-      const { user, accessToken } = data.data;
-      storeLogin(user, accessToken);
+      const response = isPriest
+        ? await authApi.registerPriest(userData)
+        : await authApi.register(userData);
+
+      const { user, accessToken } = response.data.data;
+      dispatch(setCredentials({ user, accessToken }));
       navigate(isPriest ? '/priest/onboarding' : '/dashboard');
       return { success: true };
     } catch (err: unknown) {
@@ -64,22 +90,23 @@ export const useAuth = (): {
         message: error.response?.data?.message || 'Registration failed',
       };
     } finally {
-      setIsLoading(false);
+      dispatch(setLoading(false));
     }
   };
 
   const logout = async (): Promise<void> => {
     try {
-      await api.post('/auth/logout');
+      await authApi.logout();
     } finally {
-      storeLogout();
+      dispatch(storeLogout());
       navigate('/login');
     }
   };
 
   const forgotPassword = async (email: string): Promise<{ success: boolean; message?: string }> => {
+    dispatch(setLoading(true));
     try {
-      await api.post('/auth/forgot-password', { email });
+      await authApi.forgotPassword(email);
       return { success: true };
     } catch (err: unknown) {
       const error = err as AxiosError<{ message: string }>;
@@ -87,6 +114,8 @@ export const useAuth = (): {
         success: false,
         message: error.response?.data?.message || 'Failed to send reset link',
       };
+    } finally {
+      dispatch(setLoading(false));
     }
   };
 
@@ -94,8 +123,9 @@ export const useAuth = (): {
     token: string,
     password: string
   ): Promise<{ success: boolean; message?: string }> => {
+    dispatch(setLoading(true));
     try {
-      await api.post(`/auth/reset-password/${token}`, { password });
+      await authApi.resetPassword(token, password);
       return { success: true };
     } catch (err: unknown) {
       const error = err as AxiosError<{ message: string }>;
@@ -103,6 +133,8 @@ export const useAuth = (): {
         success: false,
         message: error.response?.data?.message || 'Failed to reset password',
       };
+    } finally {
+      dispatch(setLoading(false));
     }
   };
 

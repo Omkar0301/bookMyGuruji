@@ -23,7 +23,7 @@ export class AdminService {
   /**
    * Get all pending priest verifications with bank details masked.
    */
-  static async getPendingVerifications() {
+  static async getPendingVerifications(): Promise<Record<string, unknown>[]> {
     const verifications = await PriestProfile.find({
       verificationStatus: VerificationStatus.PENDING,
     })
@@ -51,7 +51,7 @@ export class AdminService {
   /**
    * Approve a priest's verification and notify them.
    */
-  static async approvePriest(priestId: string) {
+  static async approvePriest(priestId: string): Promise<unknown> {
     const priest = await PriestProfile.findById(priestId).populate('user');
     if (!priest) throw new AppError('Priest not found', 404);
 
@@ -79,7 +79,7 @@ export class AdminService {
   /**
    * Reject a priest's verification with a reason and notify them.
    */
-  static async rejectPriest(priestId: string, reason: string) {
+  static async rejectPriest(priestId: string, reason: string): Promise<unknown> {
     if (!reason || reason.length < 10)
       throw new AppError('Reason must be at least 10 characters', 400);
 
@@ -105,7 +105,11 @@ export class AdminService {
   /**
    * Get all users with optional filtering by role, status, and search term.
    */
-  static async getUsers(query: Record<string, string>, page: number, limit: number) {
+  static async getUsers(
+    query: Record<string, string>,
+    page: number,
+    limit: number
+  ): Promise<{ data: unknown[]; total: number }> {
     const skip = (page - 1) * limit;
     const filter: Record<string, unknown> = {};
     if (query.role) filter.role = query.role;
@@ -134,7 +138,7 @@ export class AdminService {
   /**
    * Get a single user by ID.
    */
-  static async getUserById(userId: string) {
+  static async getUserById(userId: string): Promise<unknown> {
     const user = await User.findById(userId).select('-password -refreshTokens').lean();
     if (!user) throw new AppError('User not found', 404);
     return user;
@@ -143,7 +147,7 @@ export class AdminService {
   /**
    * Deactivate a user account.
    */
-  static async deactivateUser(userId: string) {
+  static async deactivateUser(userId: string): Promise<unknown> {
     const user = await User.findByIdAndUpdate(
       userId,
       { isActive: false },
@@ -156,7 +160,7 @@ export class AdminService {
   /**
    * Activate a user account.
    */
-  static async activateUser(userId: string) {
+  static async activateUser(userId: string): Promise<unknown> {
     const user = await User.findByIdAndUpdate(
       userId,
       { isActive: true },
@@ -173,7 +177,11 @@ export class AdminService {
   /**
    * Get all bookings with optional filtering.
    */
-  static async getBookings(query: Record<string, string>, page: number, limit: number) {
+  static async getBookings(
+    query: Record<string, string>,
+    page: number,
+    limit: number
+  ): Promise<{ data: unknown[]; total: number }> {
     const skip = (page - 1) * limit;
     const filter: Record<string, unknown> = {};
     if (query.status) filter.status = query.status;
@@ -206,7 +214,7 @@ export class AdminService {
   /**
    * Get detailed information for a single booking.
    */
-  static async getBookingById(bookingId: string) {
+  static async getBookingById(bookingId: string): Promise<unknown> {
     const booking = await Booking.findById(bookingId)
       .populate('user', 'name email phone')
       .populate({
@@ -221,7 +229,11 @@ export class AdminService {
   /**
    * Forcefully override the status of a booking (Admin only).
    */
-  static async overrideBookingStatus(bookingId: string, status: string, adminNote: string) {
+  static async overrideBookingStatus(
+    bookingId: string,
+    status: string,
+    adminNote: string
+  ): Promise<unknown> {
     const booking = await Booking.findById(bookingId);
     if (!booking) throw new AppError('Booking not found', 404);
 
@@ -274,7 +286,7 @@ export class AdminService {
     resolution: string,
     adminNote: string,
     userRefundPercent?: number
-  ) {
+  ): Promise<unknown> {
     const booking = await Booking.findById(bookingId).populate('user').populate('priest');
     if (!booking) throw new AppError('Booking not found', 404);
     if (booking.status !== BookingStatus.DISPUTED)
@@ -369,7 +381,7 @@ export class AdminService {
   /**
    * Get high-level overview metrics for the admin dashboard.
    */
-  static async getOverviewAnalytics() {
+  static async getOverviewAnalytics(): Promise<Record<string, unknown>> {
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -429,7 +441,7 @@ export class AdminService {
   /**
    * Get revenue aggregated by day within a specific date range.
    */
-  static async getRevenueAnalytics(fromDate: string, toDate: string) {
+  static async getRevenueAnalytics(fromDate: string, toDate: string): Promise<unknown[]> {
     const matchStage: Record<string, unknown> = { status: PaymentStatus.CAPTURED };
     if (fromDate && toDate) {
       matchStage.createdAt = {
@@ -475,7 +487,7 @@ export class AdminService {
   /**
    * Get the top earning priests.
    */
-  static async getTopPriests(limit: number) {
+  static async getTopPriests(limit: number): Promise<unknown[]> {
     const priests = await PriestProfile.find({ verificationStatus: VerificationStatus.APPROVED })
       .sort({ totalEarnings: -1 })
       .limit(limit)
