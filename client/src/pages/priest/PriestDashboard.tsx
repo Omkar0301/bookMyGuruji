@@ -1,14 +1,52 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Calendar, Users, DollarSign, Clock } from 'lucide-react';
-import { CeremonyType } from '../../types/enums';
+import { useBookings } from '../../hooks/useBookings';
 import { cn } from '../../utils/cn';
 
 const PriestDashboard: React.FC = () => {
+  const { bookings: rawBookings, loading, fetchMyBookings, updateBookingStatus } = useBookings();
+  const bookings = rawBookings as unknown as Array<{
+    id: string;
+    status: string;
+    user: {
+      name: { first: string; last: string };
+      email: string;
+    };
+    ceremony: { name: string };
+    createdAt: string;
+    scheduledDate: string;
+    scheduledTime: string;
+    venue: { city: string; state: string };
+    pricing: { totalAmount: number };
+  }>;
+
+  useEffect(() => {
+    fetchMyBookings();
+  }, []);
+
+  const pendingRequests = bookings.filter((b) => b.status === 'pending');
+  const confirmedBookings = bookings.filter((b) => b.status === 'confirmed');
+
   const stats = [
-    { label: "Today's Bookings", value: '2', icon: Clock, color: 'bg-blue-500' },
-    { label: 'Pending Requests', value: '5', icon: Users, color: 'bg-amber-500' },
-    { label: 'Total Earnings', value: '₹12,450', icon: DollarSign, color: 'bg-emerald-500' },
-    { label: 'Monthly Target', value: '85%', icon: Calendar, color: 'bg-indigo-500' },
+    {
+      label: "Today's Bookings",
+      value: confirmedBookings.length.toString(),
+      icon: Clock,
+      color: 'bg-blue-500',
+    },
+    {
+      label: 'Pending Requests',
+      value: pendingRequests.length.toString(),
+      icon: Users,
+      color: 'bg-amber-500',
+    },
+    {
+      label: 'Total Earnings',
+      value: `₹${bookings.reduce((acc, b) => acc + (b.status === 'completed' ? (b.pricing as { totalAmount: number }).totalAmount : 0), 0)}`,
+      icon: DollarSign,
+      color: 'bg-emerald-500',
+    },
+    { label: 'Success Rate', value: '100%', icon: Calendar, color: 'bg-indigo-500' },
   ];
 
   return (
@@ -47,36 +85,54 @@ const PriestDashboard: React.FC = () => {
               </button>
             </div>
             <div className="divide-y divide-slate-50">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-slate-100 rounded-full"></div>
-                    <div>
-                      <h4 className="font-bold">
-                        {i === 1
-                          ? CeremonyType.WEDDING
-                          : i === 2
-                            ? CeremonyType.PUJA
-                            : CeremonyType.HAVAN}
-                      </h4>
-                      <p className="text-xs text-slate-500">
-                        Requested by Rahul Sharma • 2 days ago
-                      </p>
+              {loading ? (
+                <div className="p-6 animate-pulse space-y-3">
+                  <div className="h-6 bg-slate-100 rounded w-3/4"></div>
+                  <div className="h-4 bg-slate-100 rounded w-1/2"></div>
+                </div>
+              ) : pendingRequests.length > 0 ? (
+                pendingRequests.map((booking) => (
+                  <div
+                    key={booking.id}
+                    className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600 font-bold">
+                        {booking.user.name.first[0]}
+                      </div>
+                      <div>
+                        <h4 className="font-bold">{booking.ceremony.name}</h4>
+                        <p className="text-xs text-slate-500">
+                          Requested by {booking.user.name.first} {booking.user.name.last} •{' '}
+                          {new Date(booking.createdAt).toLocaleDateString()}
+                        </p>
+                        <p className="text-xs text-indigo-600 font-semibold mt-1">
+                          {new Date(booking.scheduledDate).toLocaleDateString()} at{' '}
+                          {booking.scheduledTime}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() =>
+                          updateBookingStatus(booking.id, 'decline', 'Busy on this day')
+                        }
+                        className="px-4 py-2 text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                      >
+                        Decline
+                      </button>
+                      <button
+                        onClick={() => updateBookingStatus(booking.id, 'confirm')}
+                        className="px-4 py-2 text-sm font-bold bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 shadow-sm shadow-emerald-200 transition-all"
+                      >
+                        Accept
+                      </button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <button className="px-4 py-2 text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
-                      Decline
-                    </button>
-                    <button className="px-4 py-2 text-sm font-bold bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 shadow-sm shadow-emerald-200 transition-all">
-                      Accept
-                    </button>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <div className="p-10 text-center text-slate-400 italic">No pending requests</div>
+              )}
             </div>
           </section>
         </div>
@@ -85,21 +141,24 @@ const PriestDashboard: React.FC = () => {
           <section className="card p-6">
             <h2 className="text-xl font-bold mb-6">Today's Schedule</h2>
             <div className="space-y-6 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
-              {[
-                {
-                  time: '09:00 AM',
-                  event: CeremonyType.GRIHA_PRAVESH,
-                  location: 'Sector 45, Gurgaon',
-                },
-                { time: '04:30 PM', event: CeremonyType.NAMKARAN, location: 'Janakpuri, Delhi' },
-              ].map((item, i) => (
-                <div key={i} className="relative pl-8">
-                  <div className="absolute left-0 top-1 w-6 h-6 bg-white border-4 border-indigo-600 rounded-full z-10"></div>
-                  <span className="text-xs font-bold text-indigo-600">{item.time}</span>
-                  <h4 className="font-bold text-slate-900">{item.event}</h4>
-                  <p className="text-sm text-slate-500">{item.location}</p>
+              {confirmedBookings.length > 0 ? (
+                confirmedBookings.slice(0, 5).map((booking, i) => (
+                  <div key={i} className="relative pl-8">
+                    <div className="absolute left-0 top-1 w-6 h-6 bg-white border-4 border-indigo-600 rounded-full z-10"></div>
+                    <span className="text-xs font-bold text-indigo-600">
+                      {booking.scheduledTime}
+                    </span>
+                    <h4 className="font-bold text-slate-900">{booking.ceremony.name}</h4>
+                    <p className="text-sm text-slate-500">
+                      {booking.venue.city}, {booking.venue.state}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className="pl-8 text-sm text-slate-400 italic">
+                  No confirmed bookings today
                 </div>
-              ))}
+              )}
             </div>
           </section>
         </div>

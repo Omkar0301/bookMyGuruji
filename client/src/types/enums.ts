@@ -7,16 +7,15 @@ export enum UserRole {
 export enum BookingStatus {
   PENDING = 'pending',
   CONFIRMED = 'confirmed',
+  IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   CANCELLED = 'cancelled',
-  REJECTED = 'rejected',
-  ONGOING = 'ongoing',
-  PAID = 'paid',
+  DISPUTED = 'disputed',
 }
 
 export enum VerificationStatus {
   PENDING = 'pending',
-  VERIFIED = 'verified',
+  APPROVED = 'approved',
   REJECTED = 'rejected',
 }
 

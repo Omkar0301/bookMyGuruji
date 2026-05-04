@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   ChevronRight,
@@ -11,6 +11,12 @@ import {
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import AvailabilityCalendar from '../../components/shared/AvailabilityCalendar';
+import { usePriests } from '../../hooks/usePriests';
+import { useBookings } from '../../hooks/useBookings';
+import { paymentApi } from '../../api/services/payment.service';
+import { useAuth } from '../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const steps = [
   { id: 1, title: 'Ceremony', icon: Info },
@@ -20,11 +26,37 @@ const steps = [
   { id: 5, title: 'Payment', icon: CreditCard },
 ];
 
+interface PriestService {
+  name: string;
+  durationHours: number;
+  basePriceINR: number;
+  description?: string;
+}
+
+interface Priest {
+  id: string;
+  user: {
+    name: { first: string; last: string };
+    email: string;
+  };
+  services: PriestService[];
+}
+
 const BookPriestWizard: React.FC = () => {
-  useParams();
+  const { id: priestId } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { getPriestById, getAvailability } = usePriests();
+  const { createBooking, loading: bookingLoading } = useBookings();
+
   const [currentStep, setCurrentStep] = useState(1);
+  const [priest, setPriest] = useState<Priest | null>(null);
+
   const [bookingData, setBookingData] = useState({
-    ceremonyId: '',
+    ceremony: {
+      name: '',
+      duration: 0,
+    },
     date: new Date(),
     timeSlot: '',
     address: {
@@ -36,7 +68,103 @@ const BookPriestWizard: React.FC = () => {
     specialRequests: '',
   });
 
-  const nextStep = (): void => setCurrentStep((prev) => Math.min(prev + 1, 5));
+  useEffect(() => {
+    if (priestId) {
+      getPriestById(priestId).then((data) => {
+        setPriest(data as unknown as Priest);
+      });
+    }
+  }, [priestId]);
+
+  useEffect(() => {
+    if (priestId && currentStep === 2) {
+      const from = new Date();
+      const to = new Date();
+      to.setDate(to.getDate() + 30);
+      getAvailability(priestId, from.toISOString(), to.toISOString());
+    }
+  }, [priestId, currentStep]);
+
+  const nextStep = (): void => {
+    if (currentStep === 1 && !bookingData.ceremony.name) {
+      toast.warning('Please select a ceremony');
+      return;
+    }
+    if (currentStep === 2 && !bookingData.timeSlot) {
+      toast.warning('Please select a time slot');
+      return;
+    }
+    if (currentStep === 3 && (!bookingData.address.street || !bookingData.address.city)) {
+      toast.warning('Please fill in venue details');
+      return;
+    }
+    setCurrentStep((prev) => Math.min(prev + 1, 5));
+  };
+
+  const handlePayment = async (): Promise<void> => {
+    try {
+      // 1. Create booking first
+      const payload = {
+        priestId,
+        ceremony: bookingData.ceremony,
+        scheduledDate: bookingData.date.toISOString(),
+        scheduledTime: bookingData.timeSlot,
+        venue: {
+          ...bookingData.address,
+        },
+        specialRequests: bookingData.specialRequests,
+      };
+
+      const booking = (await createBooking(payload)) as unknown as { id: string };
+      if (!booking) return;
+
+      // 2. Create Razorpay order
+      const { data: orderResponse } = (await paymentApi.createOrder({
+        bookingId: booking.id,
+      })) as unknown as { data: { data: { id: string; amount: number; currency: string } } };
+      const order = orderResponse.data;
+
+      // 3. Open Razorpay Checkout
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Guruji Priest Booking',
+        description: `Booking for ${bookingData.ceremony.name}`,
+        order_id: order.id,
+        handler: async (response: Record<string, string>): Promise<void> => {
+          try {
+            await paymentApi.verifyPayment({
+              bookingId: booking.id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            toast.success('Payment successful! Your booking is confirmed.');
+            navigate('/dashboard');
+          } catch {
+            toast.error('Payment verification failed. Please contact support.');
+          }
+        },
+        prefill: {
+          name: `${user?.name.first} ${user?.name.last}`,
+          email: user?.email,
+        },
+        theme: {
+          color: '#4f46e5',
+        },
+      };
+
+      const rzp = new (
+        window as unknown as { Razorpay: new (options: unknown) => { open: () => void } }
+      ).Razorpay(options);
+      rzp.open();
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Payment initiation failed');
+    }
+  };
+
   const prevStep = (): void => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
   const renderStep = (): React.JSX.Element | null => {
@@ -46,23 +174,27 @@ const BookPriestWizard: React.FC = () => {
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
             <h2 className="text-2xl font-bold">Select Ceremony</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {['Wedding Puja', 'Griha Pravesh', 'Satyanarayan Katha', 'Engagement'].map(
-                (ceremony) => (
-                  <div
-                    key={ceremony}
-                    onClick={() => setBookingData({ ...bookingData, ceremonyId: ceremony })}
-                    className={cn(
-                      'p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300',
-                      bookingData.ceremonyId === ceremony
-                        ? 'border-indigo-600 bg-indigo-50 shadow-md'
-                        : 'border-slate-100 hover:border-slate-200 bg-white'
-                    )}
-                  >
-                    <h3 className="font-bold text-lg">{ceremony}</h3>
-                    <p className="text-sm text-slate-500 mt-1">Starting from ₹5,100</p>
-                  </div>
-                )
-              )}
+              {priest?.services?.map((service: PriestService) => (
+                <div
+                  key={service.name}
+                  onClick={() =>
+                    setBookingData({
+                      ...bookingData,
+                      ceremony: { name: service.name, duration: service.durationHours },
+                    })
+                  }
+                  className={cn(
+                    'p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300',
+                    bookingData.ceremony.name === service.name
+                      ? 'border-indigo-600 bg-indigo-50 shadow-md'
+                      : 'border-slate-100 hover:border-slate-200 bg-white'
+                  )}
+                >
+                  <h3 className="font-bold text-lg">{service.name}</h3>
+                  <p className="text-sm text-slate-500 mt-1">₹{service.basePriceINR}</p>
+                  <p className="text-xs text-slate-400 mt-2 line-clamp-2">{service.description}</p>
+                </div>
+              ))}
             </div>
           </div>
         );
@@ -121,11 +253,33 @@ const BookPriestWizard: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-slate-700 mb-1 block">City</label>
-                  <input type="text" className="input-field" placeholder="City" />
+                  <input
+                    type="text"
+                    className="input-field"
+                    placeholder="City"
+                    value={bookingData.address.city}
+                    onChange={(e) =>
+                      setBookingData({
+                        ...bookingData,
+                        address: { ...bookingData.address, city: e.target.value },
+                      })
+                    }
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-slate-700 mb-1 block">Pincode</label>
-                  <input type="text" className="input-field" placeholder="Pincode" />
+                  <input
+                    type="text"
+                    className="input-field"
+                    placeholder="Pincode"
+                    value={bookingData.address.pincode}
+                    onChange={(e) =>
+                      setBookingData({
+                        ...bookingData,
+                        address: { ...bookingData.address, pincode: e.target.value },
+                      })
+                    }
+                  />
                 </div>
               </div>
               <div>
@@ -135,6 +289,10 @@ const BookPriestWizard: React.FC = () => {
                 <textarea
                   className="input-field h-24"
                   placeholder="Any specific requirements..."
+                  value={bookingData.specialRequests}
+                  onChange={(e) =>
+                    setBookingData({ ...bookingData, specialRequests: e.target.value })
+                  }
                 ></textarea>
               </div>
             </div>
@@ -149,15 +307,22 @@ const BookPriestWizard: React.FC = () => {
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="text-xl font-bold text-slate-900">
-                      {bookingData.ceremonyId || 'Selected Ceremony'}
+                      {bookingData.ceremony.name || 'Selected Ceremony'}
                     </h3>
-                    <p className="text-slate-500">Booking with Panditji Sharma</p>
+                    <p className="text-slate-500">
+                      Booking with {priest?.user?.name?.first} {priest?.user?.name?.last}
+                    </p>
                   </div>
                   <div className="text-right">
                     <span className="text-xs text-slate-400 block uppercase font-bold">
-                      Total Price
+                      Base Price
                     </span>
-                    <span className="text-2xl font-bold text-indigo-600">₹5,100</span>
+                    <span className="text-2xl font-bold text-indigo-600">
+                      ₹
+                      {(
+                        (priest?.services as Array<{ name: string; basePriceINR: number }>) || []
+                      ).find((s) => s.name === bookingData.ceremony.name)?.basePriceINR || 0}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -176,7 +341,12 @@ const BookPriestWizard: React.FC = () => {
             </div>
           </div>
         );
-      case 5:
+      case 5: {
+        const selectedService = (
+          (priest?.services as Array<{ name: string; basePriceINR: number }>) || []
+        ).find((s) => s.name === bookingData.ceremony.name);
+        const advanceAmount = selectedService ? Math.round(selectedService.basePriceINR * 0.3) : 0;
+
         return (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 text-center py-10">
             <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -185,14 +355,22 @@ const BookPriestWizard: React.FC = () => {
             <h2 className="text-2xl font-bold">Complete Payment</h2>
             <p className="text-slate-500 max-w-sm mx-auto">
               Please pay the advance amount of{' '}
-              <span className="font-bold text-slate-900">₹1,100</span> to confirm your booking.
+              <span className="font-bold text-slate-900">₹{advanceAmount}</span> to confirm your
+              booking.
             </p>
-            <button className="btn-primary mt-8 px-12 py-4 text-lg">Pay with Razorpay</button>
+            <button
+              onClick={handlePayment}
+              disabled={bookingLoading}
+              className="btn-primary mt-8 px-12 py-4 text-lg flex items-center gap-2 mx-auto"
+            >
+              {bookingLoading ? 'Processing...' : 'Pay with Razorpay'}
+            </button>
             <p className="text-[10px] text-slate-400 mt-4 uppercase tracking-widest font-bold">
               Secure Payment Gateway
             </p>
           </div>
         );
+      }
       default:
         return null;
     }

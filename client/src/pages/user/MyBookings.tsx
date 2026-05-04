@@ -1,10 +1,68 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useBookings } from '../../hooks/useBookings';
+import BookingCard from '../../components/shared/BookingCard';
+import { BookingStatus } from '../../types/enums';
 
 const MyBookings: React.FC = () => {
+  const { bookings: rawBookings, loading, fetchMyBookings } = useBookings();
+  const bookings = rawBookings as unknown as Array<{
+    id: string;
+    bookingNumber?: string;
+    ceremony: { name: string };
+    priest: { user: { name: { first: string; last: string } } };
+    scheduledDate: string;
+    scheduledTime: string;
+    status: BookingStatus;
+  }>;
+
+  useEffect(() => {
+    fetchMyBookings();
+  }, []);
+
   return (
-    <div className="pt-24 px-4 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">MyBookings</h1>
-      <div className="card p-10 text-center text-slate-400 italic">Page content coming soon...</div>
+    <div className="pt-24 px-4 max-w-7xl mx-auto pb-20">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">My Bookings</h1>
+          <p className="text-slate-500 mt-1">Manage your ceremony schedules and status</p>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="card p-6 animate-pulse">
+              <div className="flex gap-4">
+                <div className="w-24 h-24 bg-slate-100 rounded-xl"></div>
+                <div className="flex-1 space-y-3">
+                  <div className="h-6 bg-slate-100 rounded w-3/4"></div>
+                  <div className="h-4 bg-slate-100 rounded w-1/2"></div>
+                  <div className="h-4 bg-slate-100 rounded w-1/4"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : bookings.length > 0 ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {bookings.map((booking) => (
+            <BookingCard
+              key={booking.id}
+              id={booking.id}
+              bookingNumber={booking.bookingNumber || 'N/A'}
+              ceremony={booking.ceremony.name}
+              priestName={`${booking.priest.user.name.first} ${booking.priest.user.name.last}`}
+              date={new Date(booking.scheduledDate).toLocaleDateString()}
+              time={booking.scheduledTime}
+              status={booking.status}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-20 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+          <p className="text-slate-400">You haven't made any bookings yet.</p>
+        </div>
+      )}
     </div>
   );
 };

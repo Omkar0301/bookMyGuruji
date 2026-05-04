@@ -12,6 +12,7 @@ interface BookingState {
   bookingWizard: BookingWizard;
   myBookings: Record<string, unknown>[];
   currentBooking: Record<string, unknown> | null;
+  loading: boolean;
 }
 
 const initialState: BookingState = {
@@ -24,6 +25,7 @@ const initialState: BookingState = {
   },
   myBookings: [],
   currentBooking: null,
+  loading: false,
 };
 
 const bookingSlice = createSlice({
@@ -45,9 +47,18 @@ const bookingSlice = createSlice({
     setCurrentBooking: (state, action: PayloadAction<Record<string, unknown> | null>) => {
       state.currentBooking = action.payload;
     },
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
+    },
   },
 });
 
-export const { setWizardStep, updateWizardData, resetWizard, setMyBookings, setCurrentBooking } =
-  bookingSlice.actions;
+export const {
+  setWizardStep,
+  updateWizardData,
+  resetWizard,
+  setMyBookings,
+  setCurrentBooking,
+  setLoading,
+} = bookingSlice.actions;
 export default bookingSlice.reducer;

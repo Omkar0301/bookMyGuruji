@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { authApi } from '../api/authApi';
+import { authApi } from '../api/services/auth.service';
 import { setCredentials, logout as storeLogout, setLoading } from '../features/auth/authSlice';
 import { AxiosError } from 'axios';
 
@@ -58,7 +58,15 @@ export const useAuth = (): AuthHookReturn => {
       const { data } = await authApi.login(credentials);
       const { user, accessToken } = data.data;
       dispatch(setCredentials({ user, accessToken }));
-      navigate('/dashboard');
+
+      // Role-based redirect
+      if (user.role === UserRole.ADMIN) {
+        navigate('/admin');
+      } else if (user.role === UserRole.PRIEST) {
+        navigate('/priest/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
       return { success: true };
     } catch (err: unknown) {
       const error = err as AxiosError<{ message: string }>;
@@ -83,7 +91,12 @@ export const useAuth = (): AuthHookReturn => {
 
       const { user, accessToken } = response.data.data;
       dispatch(setCredentials({ user, accessToken }));
-      navigate(isPriest ? '/priest/onboarding' : '/dashboard');
+
+      if (isPriest) {
+        navigate('/priest/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
       return { success: true };
     } catch (err: unknown) {
       const error = err as AxiosError<{ message: string }>;

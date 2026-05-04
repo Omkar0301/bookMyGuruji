@@ -12,13 +12,15 @@ const PageLoader = (): React.JSX.Element => (
 
 // Lazy Loaded Pages
 // Public
-const LandingPage = lazy(() => import('../pages/LandingPage'));
-const SearchPage = lazy(() => import('../pages/SearchPage'));
-const PriestProfilePage = lazy(() => import('../pages/PriestProfilePage'));
-const LoginPage = lazy(() => import('../pages/LoginPage'));
-const RegisterPage = lazy(() => import('../pages/RegisterPage'));
-const BecomePriestPage = lazy(() => import('../pages/BecomePriestPage'));
-const CeremoniesPage = lazy(() => import('../pages/CeremoniesPage'));
+const LandingPage = lazy(() => import('../pages/public/LandingPage'));
+const SearchPage = lazy(() => import('../pages/public/SearchPage'));
+const PriestProfilePage = lazy(() => import('../pages/public/PriestProfilePage'));
+const LoginPage = lazy(() => import('../pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'));
+const BecomePriestPage = lazy(() => import('../pages/auth/BecomePriestPage'));
+const CeremoniesPage = lazy(() => import('../pages/public/CeremoniesPage'));
+const ForgotPasswordPage = lazy(() => import('../pages/auth/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('../pages/auth/ResetPasswordPage'));
 
 // User
 const UserDashboard = lazy(() => import('../pages/user/Dashboard'));
@@ -54,8 +56,10 @@ const AppRouter: React.FC = () => {
         <Route path="/priests/:id" element={<PriestProfilePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/become-a-priest" element={<BecomePriestPage />} />
+        <Route path="/become-priest" element={<BecomePriestPage />} />
         <Route path="/ceremonies" element={<CeremoniesPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
         {/* PROTECTED USER ROUTES */}
         <Route

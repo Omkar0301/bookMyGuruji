@@ -32,7 +32,7 @@ const Navbar: React.FC = () => {
               Ceremonies
             </Link>
             {!user && (
-              <Link to="/become-a-priest" className="hover:text-indigo-600 transition-colors">
+              <Link to="/become-priest" className="hover:text-indigo-600 transition-colors">
                 Become a Priest
               </Link>
             )}

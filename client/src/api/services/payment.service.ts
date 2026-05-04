@@ -1,5 +1,5 @@
 import type { AxiosResponse } from 'axios';
-import axiosInstance from './axiosInstance';
+import axiosInstance from '../axiosInstance';
 
 export const paymentApi = {
   createOrder: (data: Record<string, unknown>): Promise<AxiosResponse> =>

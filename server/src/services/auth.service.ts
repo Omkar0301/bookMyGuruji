@@ -112,9 +112,18 @@ export class AuthService {
 
     const { user, accessToken, refreshToken } = await this.register(userData);
 
-    // Create priest profile
+    // Create priest profile with specific fields from userData
     await PriestProfile.create({
       user: user.id,
+      bio: userData.bio || '',
+      specialisations: userData.specialisations || [],
+      languages: userData.languages || [],
+      experience: userData.experienceYears || 0,
+      services:
+        (userData.services as Record<string, unknown>[])?.map((s) => ({
+          ...s,
+          duration: s.durationHours, // Mapping frontend durationHours to backend duration
+        })) || [],
       verificationStatus: VerificationStatus.PENDING,
     });
 

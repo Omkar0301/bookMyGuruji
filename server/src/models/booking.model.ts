@@ -59,6 +59,12 @@ export interface IBooking extends Document {
   specialRequests: string;
   materialsRequired: string[];
   review: mongoose.Types.ObjectId;
+  payment: {
+    orderId?: string;
+    paymentId?: string;
+    signature?: string;
+    status: 'pending' | 'captured' | 'failed' | 'refunded';
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -153,6 +159,16 @@ const bookingSchema = new Schema<IBooking>(
     },
     materialsRequired: { type: [String], default: [] },
     review: { type: Schema.Types.ObjectId, ref: 'Review' },
+    payment: {
+      orderId: { type: String, trim: true },
+      paymentId: { type: String, trim: true },
+      signature: { type: String, trim: true },
+      status: {
+        type: String,
+        enum: ['pending', 'captured', 'failed', 'refunded'],
+        default: 'pending',
+      },
+    },
   },
   {
     timestamps: true,
