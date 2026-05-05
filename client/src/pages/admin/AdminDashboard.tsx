@@ -32,7 +32,7 @@ const AdminDashboard: React.FC = () => {
                 <span className="text-sm font-medium">#BK-10{i}</span>
                 <span className="text-sm text-slate-500">₹5,100</span>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase">
-                  {BookingStatus.PAID}
+                  {BookingStatus.CONFIRMED}
                 </span>
               </div>
             ))}

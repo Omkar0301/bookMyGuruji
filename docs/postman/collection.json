@@ -364,6 +364,47 @@
           }
         },
         {
+          "name": "Get My Priest Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success true', () => pm.expect(pm.response.json().success).to.be.true);",
+                  "pm.test('has data', () => pm.expect(pm.response.json()).to.have.property('data'));",
+                  "pm.test('has bankDetails', () => pm.expect(pm.response.json().data).to.have.property('bankDetails'));",
+                  "pm.test('has earnings', () => {",
+                  "  const data = pm.response.json().data;",
+                  "  pm.expect(data).to.have.property('totalEarnings');",
+                  "  pm.expect(data).to.have.property('pendingPayout');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/priests/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "priests", "me"]
+            }
+          }
+        },
+        {
           "name": "Get Priest Profile",
           "event": [
             {
@@ -427,7 +468,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"bio\": \"Experienced Vedic priest with 15+ years of experience in traditional ceremonies.\",\n  \"specialisations\": [\"Vivah\", \"Griha Pravesh\", \"Satyanarayan Katha\", \"Mundan\"],\n  \"languages\": [\"Hindi\", \"Sanskrit\", \"English\"],\n  \"experience\": 15,\n  \"education\": \"Banaras Hindu University\",\n  \"travelRadius\": 50,\n  \"serviceAreas\": [\"Mumbai\", \"Pune\", \"Thane\", \"Navi Mumbai\"],\n  \"isAvailable\": true\n}"
+              "raw": "{\n  \"bio\": \"Experienced Vedic priest with 15+ years of experience in traditional ceremonies.\",\n  \"specialisations\": [\"Vivah\", \"Griha Pravesh\", \"Satyanarayan Katha\", \"Mundan\"],\n  \"languages\": [\"Hindi\", \"Sanskrit\", \"English\"],\n  \"experience\": 15,\n  \"education\": \"Banaras Hindu University\",\n  \"travelRadius\": 50,\n  \"serviceAreas\": [\"Mumbai\", \"Pune\", \"Thane\", \"Navi Mumbai\"],\n  \"isAvailable\": true,\n  \"bankDetails\": {\n    \"accountHolder\": \"John Doe\",\n    \"accountNumber\": \"1234567890\",\n    \"ifscCode\": \"HDFC0001234\",\n    \"upiId\": \"john@upi\"\n  }\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/priests/profile",
@@ -664,9 +705,9 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/bookings",
+              "raw": "{{baseUrl}}/api/v1/bookings",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "bookings"]
+              "path": ["api", "v1", "bookings"]
             },
             "auth": {
               "type": "bearer",
@@ -699,9 +740,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/bookings",
+              "raw": "{{baseUrl}}/api/v1/bookings",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "bookings"]
+              "path": ["api", "v1", "bookings"]
             },
             "auth": {
               "type": "bearer",
@@ -733,9 +774,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}",
+              "raw": "{{baseUrl}}/api/v1/bookings/{{bookingId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "bookings", "{{bookingId}}"]
+              "path": ["api", "v1", "bookings", "{{bookingId}}"]
             },
             "auth": {
               "type": "bearer",
@@ -767,9 +808,9 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/confirm",
+              "raw": "{{baseUrl}}/api/v1/bookings/{{bookingId}}/confirm",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "bookings", "{{bookingId}}", "confirm"]
+              "path": ["api", "v1", "bookings", "{{bookingId}}", "confirm"]
             },
             "auth": {
               "type": "bearer",
@@ -810,9 +851,9 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/decline",
+              "raw": "{{baseUrl}}/api/v1/bookings/{{bookingId}}/decline",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "bookings", "{{bookingId}}", "decline"]
+              "path": ["api", "v1", "bookings", "{{bookingId}}", "decline"]
             },
             "auth": {
               "type": "bearer",
@@ -844,9 +885,9 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/complete",
+              "raw": "{{baseUrl}}/api/v1/bookings/{{bookingId}}/complete",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "bookings", "{{bookingId}}", "complete"]
+              "path": ["api", "v1", "bookings", "{{bookingId}}", "complete"]
             },
             "auth": {
               "type": "bearer",
@@ -887,9 +928,9 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/cancel",
+              "raw": "{{baseUrl}}/api/v1/bookings/{{bookingId}}/cancel",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "bookings", "{{bookingId}}", "cancel"]
+              "path": ["api", "v1", "bookings", "{{bookingId}}", "cancel"]
             },
             "auth": {
               "type": "bearer",
@@ -930,9 +971,9 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/dispute",
+              "raw": "{{baseUrl}}/api/v1/bookings/{{bookingId}}/dispute",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "bookings", "{{bookingId}}", "dispute"]
+              "path": ["api", "v1", "bookings", "{{bookingId}}", "dispute"]
             },
             "auth": {
               "type": "bearer",
@@ -964,9 +1005,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/admin/bookings?page=1&limit=20",
+              "raw": "{{baseUrl}}/api/v1/admin/bookings?page=1&limit=20",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "admin", "bookings"],
+              "path": ["api", "v1", "admin", "bookings"],
               "query": [
                 {
                   "key": "page",
@@ -1014,7 +1055,11 @@
               "name": "Get Pending Verifications",
               "request": {
                 "method": "GET",
-                "url": "{{baseUrl}}/api/v1/admin/verifications",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/verifications",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "verifications"]
+                },
                 "auth": {
                   "type": "bearer",
                   "bearer": [
@@ -1042,7 +1087,11 @@
               "name": "Approve Priest Verification",
               "request": {
                 "method": "PATCH",
-                "url": "{{baseUrl}}/api/v1/admin/verifications/{{priestId}}/approve",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/verifications/{{priestId}}/approve",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "verifications", "{{priestId}}", "approve"]
+                },
                 "auth": {
                   "type": "bearer",
                   "bearer": [
@@ -1070,7 +1119,11 @@
               "name": "Reject Priest Verification",
               "request": {
                 "method": "PATCH",
-                "url": "{{baseUrl}}/api/v1/admin/verifications/{{priestId}}/reject",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/verifications/{{priestId}}/reject",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "verifications", "{{priestId}}", "reject"]
+                },
                 "auth": {
                   "type": "bearer",
                   "bearer": [
@@ -1113,7 +1166,17 @@
               "name": "Get Users",
               "request": {
                 "method": "GET",
-                "url": "{{baseUrl}}/api/v1/admin/users?page=1&limit=20&role=user&isActive=true",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/users?page=1&limit=20&role=user&isActive=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "users"],
+                  "query": [
+                    { "key": "page", "value": "1" },
+                    { "key": "limit", "value": "20" },
+                    { "key": "role", "value": "user" },
+                    { "key": "isActive", "value": "true" }
+                  ]
+                },
                 "auth": {
                   "type": "bearer",
                   "bearer": [
@@ -1141,7 +1204,11 @@
               "name": "Get User by ID",
               "request": {
                 "method": "GET",
-                "url": "{{baseUrl}}/api/v1/admin/users/{{userId}}",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/users/{{userId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "users", "{{userId}}"]
+                },
                 "auth": {
                   "type": "bearer",
                   "bearer": [
@@ -1169,7 +1236,11 @@
               "name": "Deactivate User",
               "request": {
                 "method": "PATCH",
-                "url": "{{baseUrl}}/api/v1/admin/users/{{userId}}/deactivate",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/users/{{userId}}/deactivate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "users", "{{userId}}", "deactivate"]
+                },
                 "auth": {
                   "type": "bearer",
                   "bearer": [
@@ -1197,7 +1268,11 @@
               "name": "Activate User",
               "request": {
                 "method": "PATCH",
-                "url": "{{baseUrl}}/api/v1/admin/users/{{userId}}/activate",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/users/{{userId}}/activate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "users", "{{userId}}", "activate"]
+                },
                 "auth": {
                   "type": "bearer",
                   "bearer": [
@@ -1230,7 +1305,16 @@
               "name": "Get All Bookings",
               "request": {
                 "method": "GET",
-                "url": "{{baseUrl}}/api/v1/admin/bookings?page=1&limit=20&status=completed",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/bookings?page=1&limit=20&status=completed",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "bookings"],
+                  "query": [
+                    { "key": "page", "value": "1" },
+                    { "key": "limit", "value": "20" },
+                    { "key": "status", "value": "completed" }
+                  ]
+                },
                 "auth": {
                   "type": "bearer",
                   "bearer": [
@@ -1258,7 +1342,11 @@
               "name": "Get Booking by ID",
               "request": {
                 "method": "GET",
-                "url": "{{baseUrl}}/api/v1/admin/bookings/{{bookingId}}",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/bookings/{{bookingId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "bookings", "{{bookingId}}"]
+                },
                 "auth": {
                   "type": "bearer",
                   "bearer": [
@@ -1286,7 +1374,11 @@
               "name": "Override Booking Status",
               "request": {
                 "method": "PATCH",
-                "url": "{{baseUrl}}/api/v1/admin/bookings/{{bookingId}}/override-status",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/bookings/{{bookingId}}/override-status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "bookings", "{{bookingId}}", "override-status"]
+                },
                 "auth": {
                   "type": "bearer",
                   "bearer": [
@@ -1329,7 +1421,11 @@
               "name": "Get Disputes",
               "request": {
                 "method": "GET",
-                "url": "{{baseUrl}}/api/v1/admin/disputes",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/disputes",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "disputes"]
+                },
                 "auth": {
                   "type": "bearer",
                   "bearer": [
@@ -1357,7 +1453,11 @@
               "name": "Resolve Dispute",
               "request": {
                 "method": "PATCH",
-                "url": "{{baseUrl}}/api/v1/admin/disputes/{{bookingId}}/resolve",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/disputes/{{bookingId}}/resolve",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "disputes", "{{bookingId}}", "resolve"]
+                },
                 "auth": {
                   "type": "bearer",
                   "bearer": [
@@ -1400,7 +1500,11 @@
               "name": "Get Analytics Overview",
               "request": {
                 "method": "GET",
-                "url": "{{baseUrl}}/api/v1/admin/analytics/overview",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/analytics/overview",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "analytics", "overview"]
+                },
                 "auth": {
                   "type": "bearer",
                   "bearer": [
@@ -1428,7 +1532,15 @@
               "name": "Get Revenue Analytics",
               "request": {
                 "method": "GET",
-                "url": "{{baseUrl}}/api/v1/admin/analytics/revenue?from=2024-01-01&to=2024-12-31",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/analytics/revenue?from=2024-01-01&to=2024-12-31",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "analytics", "revenue"],
+                  "query": [
+                    { "key": "from", "value": "2024-01-01" },
+                    { "key": "to", "value": "2024-12-31" }
+                  ]
+                },
                 "auth": {
                   "type": "bearer",
                   "bearer": [
@@ -1456,7 +1568,12 @@
               "name": "Get Top Priests",
               "request": {
                 "method": "GET",
-                "url": "{{baseUrl}}/api/v1/admin/analytics/top-priests?limit=10",
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/analytics/top-priests?limit=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "analytics", "top-priests"],
+                  "query": [{ "key": "limit", "value": "10" }]
+                },
                 "auth": {
                   "type": "bearer",
                   "bearer": [

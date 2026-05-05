@@ -11,11 +11,10 @@ interface StatusBadgeProps {
 const statusStyles: Record<BookingStatus, string> = {
   [BookingStatus.PENDING]: 'bg-amber-50 text-amber-600 border-amber-100',
   [BookingStatus.CONFIRMED]: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+  [BookingStatus.IN_PROGRESS]: 'bg-blue-50 text-blue-600 border-blue-100',
   [BookingStatus.COMPLETED]: 'bg-indigo-50 text-indigo-600 border-indigo-100',
   [BookingStatus.CANCELLED]: 'bg-rose-50 text-rose-600 border-rose-100',
-  [BookingStatus.REJECTED]: 'bg-slate-100 text-slate-600 border-slate-200',
-  [BookingStatus.ONGOING]: 'bg-blue-50 text-blue-600 border-blue-100',
-  [BookingStatus.PAID]: 'bg-teal-50 text-teal-600 border-teal-100',
+  [BookingStatus.DISPUTED]: 'bg-slate-100 text-slate-600 border-slate-200',
 };
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className }) => {

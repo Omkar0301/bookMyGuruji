@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { CeremonyType } from '../types/enums';
-import { usePriests } from '../hooks/usePriests';
-import PriestCard from '../components/shared/PriestCard';
+import { CeremonyType } from '../../types/enums';
+import { usePriests } from '../../hooks/usePriests';
+import PriestCard from '../../components/shared/PriestCard';
+import { IPriestProfile } from '../../types/priest';
 
 const SearchPage: React.FC = () => {
   const { searchResults, loading, searchPriests, filters, setFilters, pagination } = usePriests();
@@ -11,8 +12,10 @@ const SearchPage: React.FC = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const initialFilters: Record<string, string> = {};
-    if (params.get('location')) initialFilters.location = params.get('location');
-    if (params.get('ceremonyType')) initialFilters.ceremonyType = params.get('ceremonyType');
+    const loc = params.get('location');
+    const ct = params.get('ceremonyType');
+    if (loc) initialFilters.location = loc;
+    if (ct) initialFilters.ceremonyType = ct;
 
     if (Object.keys(initialFilters).length > 0) {
       setFilters(initialFilters);
@@ -74,31 +77,30 @@ const SearchPage: React.FC = () => {
           </div>
         ) : searchResults.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {searchResults.map((priest) => (
-              <PriestCard
-                key={priest.id}
-                id={priest.id}
-                name={`${priest.user.name.first} ${priest.user.name.last}`}
-                avatar={priest.user.avatar}
-                rating={priest.rating.average}
-                specialisations={priest.specialisations}
-                priceRange={{
-                  min:
-                    priest.services.length > 0
-                      ? Math.min(
-                          ...priest.services.map((s: { basePriceINR: number }) => s.basePriceINR)
-                        )
-                      : 0,
-                  max:
-                    priest.services.length > 0
-                      ? Math.max(
-                          ...priest.services.map((s: { basePriceINR: number }) => s.basePriceINR)
-                        )
-                      : 0,
-                }}
-                city={priest.user.address.city}
-              />
-            ))}
+            {searchResults.map((priestData) => {
+              const priest = priestData as unknown as IPriestProfile;
+              return (
+                <PriestCard
+                  key={priest.id}
+                  id={priest.id}
+                  name={`${priest.user.name.first} ${priest.user.name.last}`}
+                  avatar={priest.user.avatar}
+                  rating={priest.rating.average}
+                  specialisations={priest.specialisations}
+                  priceRange={{
+                    min:
+                      priest.services.length > 0
+                        ? Math.min(...priest.services.map((s) => s.basePriceINR))
+                        : 0,
+                    max:
+                      priest.services.length > 0
+                        ? Math.max(...priest.services.map((s) => s.basePriceINR))
+                        : 0,
+                  }}
+                  city={priest.user.address.city}
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-20 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">

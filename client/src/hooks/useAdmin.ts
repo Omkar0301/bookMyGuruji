@@ -1,21 +1,23 @@
+import { useState } from 'react';
 import { adminApi } from '../api/services/admin.service';
 import { toast } from 'react-toastify';
-import { useState } from 'react';
+import { IPriestProfile } from '../types/priest';
+import { IBooking } from '../types/booking';
 
-interface AdminHook {
+export interface IAdminHook {
   loading: boolean;
-  getVerifications: () => Promise<Record<string, unknown>[]>;
-  approvePriest: (priestId: string) => Promise<boolean>;
-  rejectPriest: (priestId: string, reason: string) => Promise<boolean>;
-  getUsers: (params?: Record<string, unknown>) => Promise<Record<string, unknown> | null>;
-  getBookings: (params?: Record<string, unknown>) => Promise<Record<string, unknown> | null>;
+  getVerifications: () => Promise<IPriestProfile[]>;
+  approveVerification: (priestId: string) => Promise<boolean>;
+  rejectVerification: (priestId: string, reason: string) => Promise<boolean>;
   getAnalyticsOverview: () => Promise<Record<string, unknown> | null>;
+  getTopPriests: (limit?: number) => Promise<Record<string, unknown>[]>;
+  getBookings: (params?: Record<string, unknown>) => Promise<{ data: IBooking[]; total: number }>;
 }
 
-export const useAdmin = (): AdminHook => {
+export const useAdmin = (): IAdminHook => {
   const [loading, setLoading] = useState(false);
 
-  const getVerifications = async (): Promise<Record<string, unknown>[]> => {
+  const getVerifications = async (): Promise<IPriestProfile[]> => {
     setLoading(true);
     try {
       const { data } = await adminApi.getVerifications();
@@ -29,7 +31,7 @@ export const useAdmin = (): AdminHook => {
     }
   };
 
-  const approvePriest = async (priestId: string): Promise<boolean> => {
+  const approveVerification = async (priestId: string): Promise<boolean> => {
     setLoading(true);
     try {
       await adminApi.approveVerification(priestId);
@@ -44,7 +46,7 @@ export const useAdmin = (): AdminHook => {
     }
   };
 
-  const rejectPriest = async (priestId: string, reason: string): Promise<boolean> => {
+  const rejectVerification = async (priestId: string, reason: string): Promise<boolean> => {
     setLoading(true);
     try {
       await adminApi.rejectVerification(priestId, reason);
@@ -54,38 +56,6 @@ export const useAdmin = (): AdminHook => {
       const error = err as { response?: { data?: { message?: string } } };
       toast.error(error.response?.data?.message || 'Failed to reject priest');
       return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getUsers = async (
-    params?: Record<string, unknown>
-  ): Promise<Record<string, unknown> | null> => {
-    setLoading(true);
-    try {
-      const { data } = await adminApi.getUsers(params);
-      return data;
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      toast.error(error.response?.data?.message || 'Failed to fetch users');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getBookings = async (
-    params?: Record<string, unknown>
-  ): Promise<Record<string, unknown> | null> => {
-    setLoading(true);
-    try {
-      const { data } = await adminApi.getBookings(params);
-      return data;
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      toast.error(error.response?.data?.message || 'Failed to fetch bookings');
-      return null;
     } finally {
       setLoading(false);
     }
@@ -105,13 +75,43 @@ export const useAdmin = (): AdminHook => {
     }
   };
 
+  const getTopPriests = async (limit?: number): Promise<Record<string, unknown>[]> => {
+    setLoading(true);
+    try {
+      const { data } = await adminApi.getTopPriests(limit);
+      return data.data;
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Failed to fetch top priests');
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getBookings = async (
+    params?: Record<string, unknown>
+  ): Promise<{ data: IBooking[]; total: number }> => {
+    setLoading(true);
+    try {
+      const { data } = await adminApi.getBookings(params);
+      return { data: data.data, total: data.pagination?.total || 0 };
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Failed to fetch bookings');
+      return { data: [], total: 0 };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     getVerifications,
-    approvePriest,
-    rejectPriest,
-    getUsers,
-    getBookings,
+    approveVerification,
+    rejectVerification,
     getAnalyticsOverview,
+    getTopPriests,
+    getBookings,
   };
 };

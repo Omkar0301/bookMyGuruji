@@ -10,6 +10,14 @@ import { successResponse, paginatedResponse } from '../utils/response';
 
 export class PriestController {
   /**
+   * GET /priests/me — Get logged-in priest's own profile.
+   */
+  static getMyProfile = catchAsync(async (req: Request, res: Response) => {
+    const profile = await PriestService.getProfileByUserId(req.user!.id);
+    return successResponse(res, profile, 'Priest profile fetched');
+  });
+
+  /**
    * GET /priests — Search / list priests with query filters.
    */
   static searchPriests = catchAsync(async (req: Request, res: Response) => {

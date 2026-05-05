@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CeremonyType } from '../types/enums';
+import { CeremonyType } from '../../types/enums';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();

@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { IBooking } from '../../types/booking';
 
 interface BookingWizard {
   step: number;
@@ -10,8 +11,8 @@ interface BookingWizard {
 
 interface BookingState {
   bookingWizard: BookingWizard;
-  myBookings: Record<string, unknown>[];
-  currentBooking: Record<string, unknown> | null;
+  myBookings: IBooking[];
+  currentBooking: IBooking | null;
   loading: boolean;
 }
 
@@ -41,10 +42,10 @@ const bookingSlice = createSlice({
     resetWizard: (state) => {
       state.bookingWizard = initialState.bookingWizard;
     },
-    setMyBookings: (state, action: PayloadAction<Record<string, unknown>[]>) => {
+    setMyBookings: (state, action: PayloadAction<IBooking[]>) => {
       state.myBookings = action.payload;
     },
-    setCurrentBooking: (state, action: PayloadAction<Record<string, unknown> | null>) => {
+    setCurrentBooking: (state, action: PayloadAction<IBooking | null>) => {
       state.currentBooking = action.payload;
     },
     setLoading: (state, action: PayloadAction<boolean>) => {

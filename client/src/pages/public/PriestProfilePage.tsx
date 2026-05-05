@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { usePriests } from '../hooks/usePriests';
+import { usePriests } from '../../hooks/usePriests';
+import { IPriestProfile } from '../../types/priest';
 import { Star, MapPin, Award, Calendar, ShieldCheck } from 'lucide-react';
 
 const PriestProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { getPriestById, loading } = usePriests();
-  const [priest, setPriest] = useState<Record<string, unknown> | null>(null);
+  const [priest, setPriest] = useState<IPriestProfile | null>(null);
 
   useEffect(() => {
     if (id) {
-      getPriestById(id).then(setPriest);
+      getPriestById(id).then((data) => setPriest(data as unknown as IPriestProfile));
     }
   }, [id]);
 
@@ -55,7 +56,7 @@ const PriestProfilePage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-1">
                   <Award size={16} />
-                  <span>{priest.experience} Years Exp.</span>
+                  <span>{priest.experienceYears} Years Exp.</span>
                 </div>
               </div>
 
@@ -79,7 +80,9 @@ const PriestProfilePage: React.FC = () => {
                     <span className="text-indigo-600 font-bold">₹{service.basePriceINR}</span>
                   </div>
                   <p className="text-sm text-slate-500 mb-3">{service.description}</p>
-                  <div className="text-xs text-slate-400">Duration: {service.duration} Hours</div>
+                  <div className="text-xs text-slate-400">
+                    Duration: {service.durationHours} Hours
+                  </div>
                 </div>
               ))}
             </div>

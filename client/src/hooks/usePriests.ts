@@ -6,8 +6,9 @@ import {
   setLoading,
   setFilters as setStoreFilters,
 } from '../features/priests/priestsSlice';
-import type { RootState } from '../app/store';
+import { RootState } from '../app/store';
 import { toast } from 'react-toastify';
+import { IPriestProfile, IWeeklySchedule, IService, ISlot } from '../types/priest';
 
 interface Pagination {
   total: number;
@@ -34,6 +35,17 @@ interface PriestsHook {
     fromDate: string,
     toDate: string
   ) => Promise<Record<string, unknown> | null>;
+  getMyProfile: () => Promise<IPriestProfile | null>;
+  updateProfile: (data: Partial<IPriestProfile>) => Promise<{ success: boolean; message?: string }>;
+  updateServices: (services: IService[]) => Promise<{ success: boolean; message?: string }>;
+  updateAvailability: (
+    weeklySchedule: IWeeklySchedule[]
+  ) => Promise<{ success: boolean; message?: string }>;
+  addAvailabilityOverride: (data: {
+    date: string;
+    isAvailable: boolean;
+    slots?: ISlot[];
+  }) => Promise<{ success: boolean; message?: string }>;
   setFilters: (newFilters: Partial<PriestsHook['filters']>) => void;
 }
 
@@ -96,6 +108,92 @@ export const usePriests = (): PriestsHook => {
     dispatch(setStoreFilters(newFilters));
   };
 
+  const getMyProfile = async (): Promise<IPriestProfile | null> => {
+    dispatch(setLoading(true));
+    try {
+      const { data } = await priestApi.getMyProfile();
+      return data.data as IPriestProfile;
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Failed to fetch your profile');
+      return null;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  const updateProfile = async (
+    data: Partial<IPriestProfile>
+  ): Promise<{ success: boolean; message?: string }> => {
+    dispatch(setLoading(true));
+    try {
+      await priestApi.updateProfile(data);
+      toast.success('Profile updated successfully');
+      return { success: true };
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      const msg = error.response?.data?.message || 'Failed to update profile';
+      toast.error(msg);
+      return { success: false, message: msg };
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  const updateServices = async (
+    services: IService[]
+  ): Promise<{ success: boolean; message?: string }> => {
+    dispatch(setLoading(true));
+    try {
+      const { data } = await priestApi.updateServices(services);
+      toast.success('Services updated successfully');
+      return { success: true, message: data.message };
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Failed to update services');
+      return { success: false, message: error.response?.data?.message };
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  const updateAvailability = async (
+    weeklySchedule: IWeeklySchedule[]
+  ): Promise<{ success: boolean; message?: string }> => {
+    dispatch(setLoading(true));
+    try {
+      const { data } = await priestApi.updateAvailability(weeklySchedule);
+      toast.success('Availability updated successfully');
+      return { success: true, message: data.message };
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Failed to update availability');
+      return { success: false, message: error.response?.data?.message };
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  const addAvailabilityOverride = async (data: {
+    date: string;
+    isAvailable: boolean;
+    slots?: ISlot[];
+  }): Promise<{ success: boolean; message?: string }> => {
+    dispatch(setLoading(true));
+    try {
+      await priestApi.addAvailabilityOverride(data);
+      toast.success('Availability override added');
+      return { success: true };
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      const msg = error.response?.data?.message || 'Failed to add override';
+      toast.error(msg);
+      return { success: false, message: msg };
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
   return {
     searchResults,
     selectedPriest,
@@ -105,6 +203,11 @@ export const usePriests = (): PriestsHook => {
     searchPriests,
     getPriestById,
     getAvailability,
+    getMyProfile,
+    updateProfile,
+    updateServices,
+    updateAvailability,
+    addAvailabilityOverride,
     setFilters,
   };
 };

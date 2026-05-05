@@ -3,19 +3,20 @@ import { bookingApi } from '../api/services/booking.service';
 import { setMyBookings, setCurrentBooking, setLoading } from '../features/booking/bookingSlice';
 import type { RootState } from '../app/store';
 import { toast } from 'react-toastify';
+import { IBooking } from '../types/booking';
 
 interface BookingsHook {
-  bookings: Record<string, unknown>[];
-  selectedBooking: Record<string, unknown> | null;
+  bookings: IBooking[];
+  selectedBooking: IBooking | null;
   loading: boolean;
   fetchMyBookings: (params?: Record<string, unknown>) => Promise<void>;
-  fetchBookingById: (id: string) => Promise<Record<string, unknown> | null>;
-  createBooking: (bookingData: Record<string, unknown>) => Promise<Record<string, unknown> | null>;
+  fetchBookingById: (id: string) => Promise<IBooking | null>;
+  createBooking: (bookingData: Record<string, unknown>) => Promise<IBooking | null>;
   updateBookingStatus: (
     id: string,
     action: 'confirm' | 'decline' | 'complete' | 'cancel' | 'dispute',
     reason?: string
-  ) => Promise<Record<string, unknown> | null>;
+  ) => Promise<IBooking | null>;
 }
 
 export const useBookings = (): BookingsHook => {
@@ -39,7 +40,7 @@ export const useBookings = (): BookingsHook => {
     }
   };
 
-  const fetchBookingById = async (id: string): Promise<Record<string, unknown> | null> => {
+  const fetchBookingById = async (id: string): Promise<IBooking | null> => {
     dispatch(setLoading(true));
     try {
       const { data } = await bookingApi.getBookingById(id);
@@ -54,9 +55,7 @@ export const useBookings = (): BookingsHook => {
     }
   };
 
-  const createBooking = async (
-    bookingData: Record<string, unknown>
-  ): Promise<Record<string, unknown> | null> => {
+  const createBooking = async (bookingData: Record<string, unknown>): Promise<IBooking | null> => {
     dispatch(setLoading(true));
     try {
       const { data } = await bookingApi.createBooking(bookingData);
@@ -75,7 +74,7 @@ export const useBookings = (): BookingsHook => {
     id: string,
     action: 'confirm' | 'decline' | 'complete' | 'cancel' | 'dispute',
     reason?: string
-  ): Promise<Record<string, unknown> | null> => {
+  ): Promise<IBooking | null> => {
     dispatch(setLoading(true));
     try {
       let response;
@@ -97,7 +96,16 @@ export const useBookings = (): BookingsHook => {
           break;
       }
       toast.success(`Booking ${action}ed successfully`);
-      return response?.data?.data || null;
+      const updatedBooking = response?.data?.data as IBooking;
+
+      // Update local state if needed
+      if (updatedBooking) {
+        dispatch(
+          setMyBookings(bookings.map((b) => (b.id === updatedBooking.id ? updatedBooking : b)))
+        );
+      }
+
+      return updatedBooking;
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
       toast.error(error.response?.data?.message || `Failed to ${action} booking`);

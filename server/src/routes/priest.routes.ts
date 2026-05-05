@@ -365,6 +365,23 @@ router.get('/:id', validate(priestIdParamSchema), PriestController.getPublicProf
 
 /**
  * @swagger
+ * /priests/me:
+ *   get:
+ *     summary: Get logged-in priest's profile
+ *     tags: [Priests]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Priest profile fetched
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ */
+router.get('/me', protect, authorize('priest'), PriestController.getMyProfile);
+
+/**
+ * @swagger
  * /priests/profile:
  *   put:
  *     summary: Update own priest profile

@@ -2,30 +2,17 @@ import React, { useEffect } from 'react';
 import { Calendar, Users, DollarSign, Clock } from 'lucide-react';
 import { useBookings } from '../../hooks/useBookings';
 import { cn } from '../../utils/cn';
+import { BookingStatus } from '../../types/enums';
 
 const PriestDashboard: React.FC = () => {
-  const { bookings: rawBookings, loading, fetchMyBookings, updateBookingStatus } = useBookings();
-  const bookings = rawBookings as unknown as Array<{
-    id: string;
-    status: string;
-    user: {
-      name: { first: string; last: string };
-      email: string;
-    };
-    ceremony: { name: string };
-    createdAt: string;
-    scheduledDate: string;
-    scheduledTime: string;
-    venue: { city: string; state: string };
-    pricing: { totalAmount: number };
-  }>;
+  const { bookings, loading, fetchMyBookings, updateBookingStatus } = useBookings();
 
   useEffect(() => {
     fetchMyBookings();
   }, []);
 
-  const pendingRequests = bookings.filter((b) => b.status === 'pending');
-  const confirmedBookings = bookings.filter((b) => b.status === 'confirmed');
+  const pendingRequests = bookings.filter((b) => b.status === BookingStatus.PENDING);
+  const confirmedBookings = bookings.filter((b) => b.status === BookingStatus.CONFIRMED);
 
   const stats = [
     {
@@ -42,7 +29,7 @@ const PriestDashboard: React.FC = () => {
     },
     {
       label: 'Total Earnings',
-      value: `₹${bookings.reduce((acc, b) => acc + (b.status === 'completed' ? (b.pricing as { totalAmount: number }).totalAmount : 0), 0)}`,
+      value: `₹${bookings.reduce((acc, b) => acc + (b.status === BookingStatus.COMPLETED ? b.pricing.totalAmount : 0), 0)}`,
       icon: DollarSign,
       color: 'bg-emerald-500',
     },
