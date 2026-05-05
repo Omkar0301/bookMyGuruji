@@ -13,6 +13,21 @@ export enum BookingStatus {
   DISPUTED = 'disputed',
 }
 
+export enum BookingAction {
+  CONFIRM = 'confirm',
+  DECLINE = 'decline',
+  COMPLETE = 'complete',
+  CANCEL = 'cancel',
+  DISPUTE = 'dispute',
+}
+
+export enum PaymentStatus {
+  PENDING = 'pending',
+  CAPTURED = 'captured',
+  FAILED = 'failed',
+  REFUNDED = 'refunded',
+}
+
 export enum VerificationStatus {
   PENDING = 'pending',
   APPROVED = 'approved',

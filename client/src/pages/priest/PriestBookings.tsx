@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useBookings } from '../../hooks/useBookings';
 import StatusBadge from '../../components/shared/StatusBadge';
-import { BookingStatus } from '../../types/enums';
+import { BookingStatus, BookingAction } from '../../types/enums';
 import { IBooking } from '../../types/booking';
 import { Calendar as CalendarIcon, MapPin, User, ChevronRight, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -13,10 +13,23 @@ const PriestBookings: React.FC = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
-    fetchMyBookings();
+    void fetchMyBookings();
   }, []);
 
-  const filteredBookings = bookings.filter((b) => (filter === 'all' ? true : b.status === filter));
+  const filteredBookings = (bookings as IBooking[]).filter((b) =>
+    filter === 'all' ? true : b.status === filter
+  );
+
+  const handleStatusUpdate = async (
+    id: string,
+    action: BookingAction,
+    reason?: string
+  ): Promise<void> => {
+    await updateBookingStatus(id, action, reason);
+    if (showDetailModal) {
+      setShowDetailModal(false);
+    }
+  };
 
   return (
     <div className="pt-24 pb-20 px-4 max-w-6xl mx-auto">
@@ -91,13 +104,19 @@ const PriestBookings: React.FC = () => {
                     {booking.status === BookingStatus.PENDING && (
                       <>
                         <button
-                          onClick={() => updateBookingStatus(booking.id, 'confirm')}
+                          onClick={() => void handleStatusUpdate(booking.id, BookingAction.CONFIRM)}
                           className="btn-primary py-2 px-4 text-xs"
                         >
                           Accept
                         </button>
                         <button
-                          onClick={() => updateBookingStatus(booking.id, 'decline', 'Unavailable')}
+                          onClick={() =>
+                            void handleStatusUpdate(
+                              booking.id,
+                              BookingAction.DECLINE,
+                              'Unavailable'
+                            )
+                          }
                           className="btn-secondary py-2 px-4 text-xs text-rose-600 border-rose-100 hover:bg-rose-50"
                         >
                           Decline
@@ -106,7 +125,7 @@ const PriestBookings: React.FC = () => {
                     )}
                     {booking.status === BookingStatus.CONFIRMED && (
                       <button
-                        onClick={() => updateBookingStatus(booking.id, 'complete')}
+                        onClick={() => void handleStatusUpdate(booking.id, BookingAction.COMPLETE)}
                         className="btn-primary py-2 px-4 text-xs bg-emerald-500 hover:bg-emerald-600 border-none"
                       >
                         Mark Completed
@@ -232,8 +251,7 @@ const PriestBookings: React.FC = () => {
                 <div className="flex gap-4 pt-4">
                   <button
                     onClick={() => {
-                      updateBookingStatus(selectedBooking.id, 'confirm');
-                      setShowDetailModal(false);
+                      void handleStatusUpdate(selectedBooking.id, BookingAction.CONFIRM);
                     }}
                     className="flex-1 btn-primary py-4"
                   >
@@ -241,8 +259,11 @@ const PriestBookings: React.FC = () => {
                   </button>
                   <button
                     onClick={() => {
-                      updateBookingStatus(selectedBooking.id, 'decline', 'Unavailable');
-                      setShowDetailModal(false);
+                      void handleStatusUpdate(
+                        selectedBooking.id,
+                        BookingAction.DECLINE,
+                        'Unavailable'
+                      );
                     }}
                     className="flex-1 btn-secondary text-rose-600 border-rose-100 hover:bg-rose-50"
                   >

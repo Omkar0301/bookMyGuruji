@@ -1,4 +1,4 @@
-import { BookingStatus } from './enums';
+import { BookingStatus, PaymentStatus } from './enums';
 
 export interface IBooking {
   id: string;
@@ -14,6 +14,8 @@ export interface IBooking {
     id: string;
     user: {
       name: { first: string; last: string };
+      email: string;
+      phone: string;
       avatar?: string;
     };
   };
@@ -40,7 +42,7 @@ export interface IBooking {
     priestEarnings: number;
   };
   status: BookingStatus;
-  paymentStatus: 'pending' | 'captured' | 'failed' | 'refunded';
+  paymentStatus: PaymentStatus;
   paymentId?: string;
   declineReason?: string;
   cancelReason?: string;

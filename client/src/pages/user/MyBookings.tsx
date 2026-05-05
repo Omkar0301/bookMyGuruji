@@ -1,23 +1,16 @@
 import React, { useEffect } from 'react';
 import { useBookings } from '../../hooks/useBookings';
 import BookingCard from '../../components/shared/BookingCard';
-import { BookingStatus } from '../../types/enums';
+import { IBooking } from '../../types/booking';
 
 const MyBookings: React.FC = () => {
-  const { bookings: rawBookings, loading, fetchMyBookings } = useBookings();
-  const bookings = rawBookings as unknown as Array<{
-    id: string;
-    bookingNumber?: string;
-    ceremony: { name: string };
-    priest: { user: { name: { first: string; last: string } } };
-    scheduledDate: string;
-    scheduledTime: string;
-    status: BookingStatus;
-  }>;
+  const { bookings, loading, fetchMyBookings } = useBookings();
 
   useEffect(() => {
-    fetchMyBookings();
+    void fetchMyBookings();
   }, []);
+
+  const typedBookings = bookings as IBooking[];
 
   return (
     <div className="pt-24 px-4 max-w-7xl mx-auto pb-20">
@@ -43,9 +36,9 @@ const MyBookings: React.FC = () => {
             </div>
           ))}
         </div>
-      ) : bookings.length > 0 ? (
+      ) : typedBookings.length > 0 ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {bookings.map((booking) => (
+          {typedBookings.map((booking) => (
             <BookingCard
               key={booking.id}
               id={booking.id}

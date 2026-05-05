@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   ChevronRight,
   ChevronLeft,
@@ -7,16 +7,17 @@ import {
   MapPin,
   CheckCircle2,
   CreditCard,
-  Info,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import AvailabilityCalendar from '../../components/shared/AvailabilityCalendar';
+import { IBooking } from '../../types/booking';
+import { IPriestProfile, IService } from '../../types/priest';
+import { useAuth } from '../../hooks/useAuth';
 import { usePriests } from '../../hooks/usePriests';
 import { useBookings } from '../../hooks/useBookings';
 import { paymentApi } from '../../api/services/payment.service';
-import { useAuth } from '../../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Info } from 'lucide-react';
 
 const steps = [
   { id: 1, title: 'Ceremony', icon: Info },
@@ -26,22 +27,6 @@ const steps = [
   { id: 5, title: 'Payment', icon: CreditCard },
 ];
 
-interface PriestService {
-  name: string;
-  durationHours: number;
-  basePriceINR: number;
-  description?: string;
-}
-
-interface Priest {
-  id: string;
-  user: {
-    name: { first: string; last: string };
-    email: string;
-  };
-  services: PriestService[];
-}
-
 const BookPriestWizard: React.FC = () => {
   const { id: priestId } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -50,7 +35,7 @@ const BookPriestWizard: React.FC = () => {
   const { createBooking, loading: bookingLoading } = useBookings();
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [priest, setPriest] = useState<Priest | null>(null);
+  const [priest, setPriest] = useState<IPriestProfile | null>(null);
 
   const [bookingData, setBookingData] = useState({
     ceremony: {
@@ -71,19 +56,19 @@ const BookPriestWizard: React.FC = () => {
   useEffect(() => {
     if (priestId) {
       getPriestById(priestId).then((data) => {
-        setPriest(data as unknown as Priest);
+        setPriest(data as unknown as IPriestProfile);
       });
     }
-  }, [priestId]);
+  }, [priestId, getPriestById]);
 
   useEffect(() => {
     if (priestId && currentStep === 2) {
       const from = new Date();
       const to = new Date();
       to.setDate(to.getDate() + 30);
-      getAvailability(priestId, from.toISOString(), to.toISOString());
+      void getAvailability(priestId, from.toISOString(), to.toISOString());
     }
-  }, [priestId, currentStep]);
+  }, [priestId, currentStep, getAvailability]);
 
   const nextStep = (): void => {
     if (currentStep === 1 && !bookingData.ceremony.name) {
@@ -103,6 +88,8 @@ const BookPriestWizard: React.FC = () => {
 
   const handlePayment = async (): Promise<void> => {
     try {
+      if (!priestId) return;
+
       // 1. Create booking first
       const payload = {
         priestId,
@@ -115,13 +102,13 @@ const BookPriestWizard: React.FC = () => {
         specialRequests: bookingData.specialRequests,
       };
 
-      const booking = (await createBooking(payload)) as unknown as { id: string };
+      const booking = (await createBooking(payload)) as IBooking | undefined;
       if (!booking) return;
 
       // 2. Create Razorpay order
-      const { data: orderResponse } = (await paymentApi.createOrder({
+      const { data: orderResponse } = await paymentApi.createOrder({
         bookingId: booking.id,
-      })) as unknown as { data: { data: { id: string; amount: number; currency: string } } };
+      });
       const order = orderResponse.data;
 
       // 3. Open Razorpay Checkout
@@ -132,7 +119,11 @@ const BookPriestWizard: React.FC = () => {
         name: 'Guruji Priest Booking',
         description: `Booking for ${bookingData.ceremony.name}`,
         order_id: order.id,
-        handler: async (response: Record<string, string>): Promise<void> => {
+        handler: async (response: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }): Promise<void> => {
           try {
             await paymentApi.verifyPayment({
               bookingId: booking.id,
@@ -156,7 +147,9 @@ const BookPriestWizard: React.FC = () => {
       };
 
       const rzp = new (
-        window as unknown as { Razorpay: new (options: unknown) => { open: () => void } }
+        window as unknown as {
+          Razorpay: new (options: unknown) => { open: () => void };
+        }
       ).Razorpay(options);
       rzp.open();
     } catch (err: unknown) {
@@ -174,7 +167,7 @@ const BookPriestWizard: React.FC = () => {
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
             <h2 className="text-2xl font-bold">Select Ceremony</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {priest?.services?.map((service: PriestService) => (
+              {priest?.services?.map((service: IService) => (
                 <div
                   key={service.name}
                   onClick={() =>

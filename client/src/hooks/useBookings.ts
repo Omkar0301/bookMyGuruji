@@ -4,6 +4,7 @@ import { setMyBookings, setCurrentBooking, setLoading } from '../features/bookin
 import type { RootState } from '../app/store';
 import { toast } from 'react-toastify';
 import { IBooking } from '../types/booking';
+import { BookingAction } from '../types/enums';
 
 interface BookingsHook {
   bookings: IBooking[];
@@ -14,7 +15,7 @@ interface BookingsHook {
   createBooking: (bookingData: Record<string, unknown>) => Promise<IBooking | null>;
   updateBookingStatus: (
     id: string,
-    action: 'confirm' | 'decline' | 'complete' | 'cancel' | 'dispute',
+    action: BookingAction,
     reason?: string
   ) => Promise<IBooking | null>;
 }
@@ -72,26 +73,26 @@ export const useBookings = (): BookingsHook => {
 
   const updateBookingStatus = async (
     id: string,
-    action: 'confirm' | 'decline' | 'complete' | 'cancel' | 'dispute',
+    action: BookingAction,
     reason?: string
   ): Promise<IBooking | null> => {
     dispatch(setLoading(true));
     try {
       let response;
       switch (action) {
-        case 'confirm':
+        case BookingAction.CONFIRM:
           response = await bookingApi.confirmBooking(id);
           break;
-        case 'decline':
+        case BookingAction.DECLINE:
           response = await bookingApi.declineBooking(id, reason || '');
           break;
-        case 'complete':
+        case BookingAction.COMPLETE:
           response = await bookingApi.completeBooking(id);
           break;
-        case 'cancel':
+        case BookingAction.CANCEL:
           response = await bookingApi.cancelBooking(id, reason || '');
           break;
-        case 'dispute':
+        case BookingAction.DISPUTE:
           response = await bookingApi.disputeBooking(id, reason || '');
           break;
       }
