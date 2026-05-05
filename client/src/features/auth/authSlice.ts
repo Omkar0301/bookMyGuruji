@@ -8,6 +8,8 @@ export interface User {
   name: { first: string; last: string };
   avatar?: string;
   isEmailVerified: boolean;
+  isActive: boolean;
+  createdAt: string;
 }
 
 interface AuthState {

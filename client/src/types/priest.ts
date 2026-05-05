@@ -75,5 +75,6 @@ export interface IPriestProfile {
   travelRadius?: number;
   serviceAreas?: string[];
   pendingPayout?: number;
+  totalEarnings?: number;
   bankDetails?: IBankDetails;
 }
